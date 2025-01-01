@@ -13,7 +13,7 @@ export const clientFormSchema = z.object({
   icn: z.string().optional().nullable(),
   entity_type_id: z.string().optional().nullable(),
   industry_id: z.string().optional().nullable(),
-  client_code: z.string().min(1, "Client code is required"),
+  client_code: z.string().min(1, "Client code is required"), // Made required to match DB
   slug: z.string().min(1, "Slug is required"),
   location_type: z.enum(["HEADQUARTERS", "BRANCH"]),
   is_active: z.boolean().default(true),
@@ -30,7 +30,7 @@ export const clientFormSchema = z.object({
   headquarters_id: z.string().optional().nullable(),
   contact_info: z.any().optional().nullable(),
   logo_url: z.string().optional().nullable(),
-  parent_company_id: z.string().optional().nullable(), // Added for parent company association
+  parent_company_id: z.string().optional().nullable(),
 });
 
 export type ClientFormValues = z.infer<typeof clientFormSchema>;

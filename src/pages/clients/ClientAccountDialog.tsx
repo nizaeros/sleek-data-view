@@ -38,7 +38,7 @@ export const ClientAccountDialog = ({
     defaultValues: {
       display_name: "",
       registered_name: "",
-      client_code: "",
+      client_code: "", // Required field
       slug: "",
       location_type: "BRANCH",
       is_active: true,

@@ -37,7 +37,6 @@ export const ClientAccountDialog = ({
     if (client) {
       form.reset(client);
     } else {
-      // Reset form with default values when opening for a new client
       form.reset({
         display_name: "",
         registered_name: "",
@@ -97,15 +96,7 @@ export const ClientAccountDialog = ({
   };
 
   const onSubmit = async (data: any) => {
-    if (!form.formState.isValid) {
-      toast({
-        title: "Validation Error",
-        description: "Please fill in all required fields",
-        variant: "destructive",
-      });
-      return;
-    }
-
+    // Remove the initial validation check since form.handleSubmit already handles this
     if (!data.parent_company_id) {
       toast({
         title: "Error",
@@ -154,7 +145,7 @@ export const ClientAccountDialog = ({
               </Button>
               <Button 
                 type="submit" 
-                disabled={mutation.isPending || !form.formState.isValid}
+                disabled={mutation.isPending}
               >
                 {client ? "Update" : "Create"}
               </Button>

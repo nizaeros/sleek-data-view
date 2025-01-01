@@ -60,6 +60,7 @@ export const ClientAccountDialog = ({
       entity_type_id: null,
       contact_info: null,
       logo_url: null,
+      parent_company_id: null,
     },
   });
 
@@ -76,6 +77,23 @@ export const ClientAccountDialog = ({
       return data.map(account => ({
         value: account.client_account_id,
         label: account.display_name,
+      }));
+    },
+  });
+
+  // Fetch parent companies
+  const { data: parentCompanies } = useQuery({
+    queryKey: ["parent-companies"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("parent_companies")
+        .select("parent_company_id, display_name")
+        .eq("is_active", true);
+      
+      if (error) throw error;
+      return data.map(company => ({
+        value: company.parent_company_id,
+        label: company.display_name,
       }));
     },
   });
@@ -114,35 +132,77 @@ export const ClientAccountDialog = ({
 
   useEffect(() => {
     if (client) {
+      // Fetch existing parent company association
+      const fetchParentCompanyAssociation = async () => {
+        const { data, error } = await supabase
+          .from("parent_client_association")
+          .select("parent_company_id")
+          .eq("client_account_id", client.client_account_id)
+          .single();
+
+        if (!error && data) {
+          form.setValue("parent_company_id", data.parent_company_id);
+        }
+      };
+
+      fetchParentCompanyAssociation();
       form.reset(client);
     }
   }, [client, form]);
 
+  const handleLogoUpload = async (file: File) => {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${crypto.randomUUID()}.${fileExt}`;
+    const filePath = `${fileName}`;
+
+    const { error: uploadError, data } = await supabase.storage
+      .from('company-logos')
+      .upload(filePath, file);
+
+    if (uploadError) {
+      toast({
+        title: "Error uploading logo",
+        description: uploadError.message,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const { data: { publicUrl } } = supabase.storage
+      .from('company-logos')
+      .getPublicUrl(filePath);
+
+    form.setValue("logo_url", publicUrl);
+  };
+
   const mutation = useMutation({
     mutationFn: async (values: ClientFormValues) => {
-      const { data: clientData, error: clientError } = client
+      const { parent_company_id, ...clientData } = values;
+
+      // Handle client account update/creation
+      const { data: savedClient, error: clientError } = client
         ? await supabase
             .from("client_accounts")
-            .update(values)
+            .update(clientData)
             .eq("client_account_id", client.client_account_id)
             .select()
             .single()
         : await supabase
             .from("client_accounts")
-            .insert(values)
+            .insert(clientData)
             .select()
             .single();
 
       if (clientError) throw clientError;
 
-      // Handle parent_client_association if parent_client_account_id is provided
-      if (values.parent_client_account_id) {
+      // Handle parent company association
+      if (parent_company_id) {
         const { error: associationError } = await supabase
           .from("parent_client_association")
           .upsert(
             {
-              client_account_id: clientData.client_account_id,
-              parent_company_id: values.parent_client_account_id,
+              client_account_id: savedClient.client_account_id,
+              parent_company_id: parent_company_id,
             },
             { onConflict: "client_account_id" }
           );
@@ -150,7 +210,7 @@ export const ClientAccountDialog = ({
         if (associationError) throw associationError;
       }
 
-      return clientData;
+      return savedClient;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["clients"] });
@@ -188,6 +248,8 @@ export const ClientAccountDialog = ({
               parentAccounts={parentAccounts || []}
               industries={industries || []}
               entityTypes={entityTypes || []}
+              parentCompanies={parentCompanies || []}
+              onLogoUpload={handleLogoUpload}
             />
             <div className="flex justify-end gap-2">
               <Button

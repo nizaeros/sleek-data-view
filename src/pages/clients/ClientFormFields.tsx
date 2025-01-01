@@ -5,16 +5,16 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { UseFormReturn } from "react-hook-form";
 import type { ClientFormValues } from "./client-form.schema";
-import { Button } from "@/components/ui/button";
 import { Upload } from "lucide-react";
+import { ParentCompanyChips } from "./components/ParentCompanyChips";
 
 interface ClientFormFieldsProps {
   form: UseFormReturn<ClientFormValues>;
   parentAccounts: { value: string; label: string; }[];
   industries: { value: string; label: string; }[];
   entityTypes: { value: string; label: string; }[];
-  parentCompanies: { value: string; label: string; }[];
   onLogoUpload: (file: File) => Promise<void>;
+  client?: { client_account_id: string } | null;
 }
 
 export const ClientFormFields = ({
@@ -22,8 +22,8 @@ export const ClientFormFields = ({
   parentAccounts,
   industries,
   entityTypes,
-  parentCompanies,
   onLogoUpload,
+  client,
 }: ClientFormFieldsProps) => {
   const handleLogoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -87,6 +87,25 @@ export const ClientFormFields = ({
           )}
         />
       </div>
+
+      {/* Parent Company Selection */}
+      <FormField
+        control={form.control}
+        name="parent_company_id"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Parent Company</FormLabel>
+            <FormControl>
+              <ParentCompanyChips
+                selectedCompanyId={field.value}
+                clientAccountId={client?.client_account_id}
+                onSelect={(value) => field.onChange(value)}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
 
       {/* Registration and Tax Information */}
       <div className="space-y-4 border rounded-lg p-4">
@@ -219,35 +238,6 @@ export const ClientFormFields = ({
               <FormControl>
                 <Input {...field} />
               </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
-
-      {/* Parent Company Association */}
-      <div className="space-y-4 border rounded-lg p-4">
-        <h3 className="text-lg font-medium">Parent Company Association</h3>
-        <FormField
-          control={form.control}
-          name="parent_company_id"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Parent Company</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value || ""}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select parent company" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {parentCompanies.map((company) => (
-                    <SelectItem key={company.value} value={company.value}>
-                      {company.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
               <FormMessage />
             </FormItem>
           )}

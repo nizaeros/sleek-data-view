@@ -30,7 +30,9 @@ export const clientFormSchema = z.object({
   headquarters_id: z.string().optional().nullable(),
   contact_info: z.any().optional().nullable(),
   logo_url: z.string().optional().nullable(),
-  parent_company_id: z.string().optional().nullable(),
+  parent_company_id: z.string({
+    required_error: "Parent company selection is required",
+  }),
 });
 
 export type ClientFormValues = z.infer<typeof clientFormSchema>;

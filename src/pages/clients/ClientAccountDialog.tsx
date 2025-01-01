@@ -18,6 +18,7 @@ import {
   type ClientFormValues, 
   type ClientAccount 
 } from "./client-form.schema";
+import { ParentCompanyChips } from "./components/ParentCompanyChips";
 
 interface ClientAccountDialogProps {
   open: boolean;
@@ -38,7 +39,7 @@ export const ClientAccountDialog = ({
     defaultValues: {
       display_name: "",
       registered_name: "",
-      client_code: "", // Required field
+      client_code: "",
       slug: "",
       location_type: "BRANCH",
       is_active: true,
@@ -60,7 +61,7 @@ export const ClientAccountDialog = ({
       entity_type_id: null,
       contact_info: null,
       logo_url: null,
-      parent_company_id: null,
+      parent_company_id: "", // Initialize with empty string for required field
     },
   });
 
@@ -77,23 +78,6 @@ export const ClientAccountDialog = ({
       return data.map(account => ({
         value: account.client_account_id,
         label: account.display_name,
-      }));
-    },
-  });
-
-  // Fetch parent companies
-  const { data: parentCompanies } = useQuery({
-    queryKey: ["parent-companies"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("parent_companies")
-        .select("parent_company_id, display_name")
-        .eq("is_active", true);
-      
-      if (error) throw error;
-      return data.map(company => ({
-        value: company.parent_company_id,
-        label: company.display_name,
       }));
     },
   });
@@ -132,20 +116,6 @@ export const ClientAccountDialog = ({
 
   useEffect(() => {
     if (client) {
-      // Fetch existing parent company association
-      const fetchParentCompanyAssociation = async () => {
-        const { data, error } = await supabase
-          .from("parent_client_association")
-          .select("parent_company_id")
-          .eq("client_account_id", client.client_account_id)
-          .maybeSingle();
-
-        if (!error && data) {
-          form.setValue("parent_company_id", data.parent_company_id);
-        }
-      };
-
-      fetchParentCompanyAssociation();
       form.reset(client);
     }
   }, [client, form]);
@@ -179,9 +149,8 @@ export const ClientAccountDialog = ({
     mutationFn: async (values: ClientFormValues) => {
       const { parent_company_id, ...clientData } = values;
 
-      // Ensure required fields are present
-      if (!clientData.client_code || !clientData.display_name || !clientData.registered_name || !clientData.slug) {
-        throw new Error("Required fields are missing");
+      if (!parent_company_id) {
+        throw new Error("Parent company selection is required");
       }
 
       // Handle client account update/creation
@@ -201,29 +170,19 @@ export const ClientAccountDialog = ({
       if (clientError) throw clientError;
 
       // Handle parent company association
-      if (parent_company_id) {
-        const { error: associationError } = await supabase
-          .from("parent_client_association")
-          .upsert(
-            {
-              client_account_id: savedClient.client_account_id,
-              parent_company_id: parent_company_id,
-            },
-            {
-              onConflict: 'unique_client_parent_association'
-            }
-          );
+      const { error: associationError } = await supabase
+        .from("parent_client_association")
+        .upsert(
+          {
+            client_account_id: savedClient.client_account_id,
+            parent_company_id: parent_company_id,
+          },
+          {
+            onConflict: "client_account_id,parent_company_id",
+          }
+        );
 
-        if (associationError) throw associationError;
-      } else {
-        // If no parent company is selected, remove any existing association
-        const { error: deleteError } = await supabase
-          .from("parent_client_association")
-          .delete()
-          .eq("client_account_id", savedClient.client_account_id);
-
-        if (deleteError) throw deleteError;
-      }
+      if (associationError) throw associationError;
 
       return savedClient;
     },
@@ -263,8 +222,8 @@ export const ClientAccountDialog = ({
               parentAccounts={parentAccounts || []}
               industries={industries || []}
               entityTypes={entityTypes || []}
-              parentCompanies={parentCompanies || []}
               onLogoUpload={handleLogoUpload}
+              client={client}
             />
             <div className="flex justify-end gap-2">
               <Button

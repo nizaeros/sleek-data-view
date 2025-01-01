@@ -12,6 +12,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ClientAccountDialog } from "./ClientAccountDialog";
 import type { Database } from "@/integrations/supabase/types";
+import { Plus } from "lucide-react";
 
 type ClientAccount = Database["public"]["Tables"]["client_accounts"]["Row"];
 
@@ -54,43 +55,45 @@ export const ClientAccounts = () => {
   }
 
   return (
-    <div className="px-4 sm:px-6 lg:px-8 py-4">
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-xl font-semibold text-[#1034A6]">Client Accounts</h1>
-        <Button onClick={handleCreate} size="sm">Add Client</Button>
+    <div className="px-4 sm:px-6 lg:px-6 py-3">
+      <div className="flex items-center justify-between mb-3">
+        <h1 className="text-base font-semibold text-[#1034A6]">Client Accounts</h1>
+        <Button onClick={handleCreate} size="icon" className="h-8 w-8">
+          <Plus className="h-4 w-4" />
+        </Button>
       </div>
       <div className="border rounded-md overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/50">
-              <TableHead className="py-2">Display Name</TableHead>
-              <TableHead className="py-2">Client Code</TableHead>
-              <TableHead className="py-2">Location</TableHead>
-              <TableHead className="py-2">Location Type</TableHead>
-              <TableHead className="py-2">Status</TableHead>
-              <TableHead className="py-2 w-[100px]">Actions</TableHead>
+              <TableHead className="py-1.5">Display Name</TableHead>
+              <TableHead className="py-1.5">Client Code</TableHead>
+              <TableHead className="py-1.5">Location</TableHead>
+              <TableHead className="py-1.5">Location Type</TableHead>
+              <TableHead className="py-1.5">Status</TableHead>
+              <TableHead className="py-1.5 w-[80px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {clients?.map((client) => (
               <TableRow key={client.client_account_id} className="hover:bg-muted/50">
-                <TableCell className="py-2">{client.display_name}</TableCell>
-                <TableCell className="py-2">{client.client_code}</TableCell>
-                <TableCell className="py-2">{formatLocation(client)}</TableCell>
-                <TableCell className="py-2">{client.location_type}</TableCell>
-                <TableCell className="py-2">
-                  <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                <TableCell className="py-1.5">{client.display_name}</TableCell>
+                <TableCell className="py-1.5">{client.client_code}</TableCell>
+                <TableCell className="py-1.5">{formatLocation(client)}</TableCell>
+                <TableCell className="py-1.5">{client.location_type}</TableCell>
+                <TableCell className="py-1.5">
+                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
                     client.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                   }`}>
                     {client.is_active ? "Active" : "Inactive"}
                   </span>
                 </TableCell>
-                <TableCell className="py-2">
+                <TableCell className="py-1.5">
                   <Button 
                     variant="ghost" 
                     size="sm"
                     onClick={() => handleEdit(client)}
-                    className="h-8 px-2"
+                    className="h-7 px-2"
                   >
                     Edit
                   </Button>

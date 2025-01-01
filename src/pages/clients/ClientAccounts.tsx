@@ -31,16 +31,20 @@ export const ClientAccounts = () => {
         baseQuery = baseQuery.ilike("display_name", `%${searchQuery}%`);
       }
 
-      const [totalCount, activeCount, inactiveCount] = await Promise.all([
-        baseQuery,
-        baseQuery.eq("is_active", true),
-        baseQuery.eq("is_active", false),
+      const totalPromise = baseQuery;
+      const activePromise = baseQuery.eq("is_active", true);
+      const inactivePromise = baseQuery.eq("is_active", false);
+
+      const [totalResult, activeResult, inactiveResult] = await Promise.all([
+        totalPromise,
+        activePromise,
+        inactivePromise
       ]);
 
       return {
-        all: totalCount.count || 0,
-        active: activeCount.count || 0,
-        inactive: inactiveCount.count || 0,
+        all: totalResult.count || 0,
+        active: activeResult.count || 0,
+        inactive: inactiveResult.count || 0,
       };
     },
   });

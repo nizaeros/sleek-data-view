@@ -54,7 +54,7 @@ export const ParentCompanyChips = ({
       if (data) {
         const associatedIds = data.map(assoc => assoc.parent_company_id);
         setCurrentAssociations(associatedIds);
-        // If there's at least one association, select the first one
+        // If there's at least one association and no selection, select the first one
         if (associatedIds.length > 0 && !selectedCompanyId) {
           onSelect(associatedIds[0]);
         }
@@ -62,7 +62,57 @@ export const ParentCompanyChips = ({
     };
 
     fetchAssociations();
-  }, [clientAccountId]);
+  }, [clientAccountId, toast]);
+
+  const handleToggle = async (companyId: string) => {
+    if (!clientAccountId) {
+      // For new clients, just update the selection
+      onSelect(selectedCompanyId === companyId ? null : companyId);
+      return;
+    }
+
+    try {
+      if (currentAssociations.includes(companyId)) {
+        // Remove association
+        const { error } = await supabase
+          .from("parent_client_association")
+          .delete()
+          .eq("client_account_id", clientAccountId)
+          .eq("parent_company_id", companyId);
+
+        if (error) throw error;
+
+        setCurrentAssociations(prev => prev.filter(id => id !== companyId));
+        if (selectedCompanyId === companyId) {
+          onSelect(null);
+        }
+      } else {
+        // Add association
+        const { error } = await supabase
+          .from("parent_client_association")
+          .insert({
+            client_account_id: clientAccountId,
+            parent_company_id: companyId,
+          });
+
+        if (error) throw error;
+
+        setCurrentAssociations(prev => [...prev, companyId]);
+        onSelect(companyId);
+      }
+
+      toast({
+        title: "Success",
+        description: `Parent company association ${currentAssociations.includes(companyId) ? "removed" : "added"} successfully`,
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "An error occurred",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <div className="space-y-2">
@@ -78,9 +128,7 @@ export const ParentCompanyChips = ({
             <span className="font-medium">{company.display_name}</span>
             <button
               type="button"
-              onClick={() => onSelect(
-                isSelected ? null : company.parent_company_id
-              )}
+              onClick={() => handleToggle(company.parent_company_id)}
               className="flex items-center gap-2 text-sm"
             >
               {isAssociated ? (

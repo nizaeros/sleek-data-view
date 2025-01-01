@@ -34,9 +34,11 @@ export const ClientAccounts = () => {
         return query;
       };
 
-      const totalResult = await createBaseQuery();
-      const activeResult = await createBaseQuery().eq("is_active", true);
-      const inactiveResult = await createBaseQuery().eq("is_active", false);
+      const [totalResult, activeResult, inactiveResult] = await Promise.all([
+        createBaseQuery(),
+        createBaseQuery().eq("is_active", true),
+        createBaseQuery().eq("is_active", false)
+      ]);
 
       return {
         all: totalResult.count || 0,

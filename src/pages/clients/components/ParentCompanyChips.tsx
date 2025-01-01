@@ -16,7 +16,7 @@ export const ParentCompanyChips = ({
   onSelect,
 }: ParentCompanyChipsProps) => {
   const { toast } = useToast();
-  const [currentAssociation, setCurrentAssociation] = useState<string | null>(null);
+  const [currentAssociations, setCurrentAssociations] = useState<string[]>([]);
 
   // Fetch parent companies
   const { data: parentCompanies } = useQuery({
@@ -32,20 +32,19 @@ export const ParentCompanyChips = ({
     },
   });
 
-  // Fetch existing association if editing
+  // Fetch existing associations if editing
   useEffect(() => {
-    const fetchAssociation = async () => {
+    const fetchAssociations = async () => {
       if (!clientAccountId) return;
 
       const { data, error } = await supabase
         .from("parent_client_association")
         .select("parent_company_id")
-        .eq("client_account_id", clientAccountId)
-        .maybeSingle(); // Changed from .single() to .maybeSingle()
+        .eq("client_account_id", clientAccountId);
 
       if (error) {
         toast({
-          title: "Error fetching association",
+          title: "Error fetching associations",
           description: error.message,
           variant: "destructive",
         });
@@ -53,40 +52,49 @@ export const ParentCompanyChips = ({
       }
 
       if (data) {
-        setCurrentAssociation(data.parent_company_id);
-        onSelect(data.parent_company_id);
+        const associatedIds = data.map(assoc => assoc.parent_company_id);
+        setCurrentAssociations(associatedIds);
+        // If there's at least one association, select the first one
+        if (associatedIds.length > 0 && !selectedCompanyId) {
+          onSelect(associatedIds[0]);
+        }
       }
     };
 
-    fetchAssociation();
+    fetchAssociations();
   }, [clientAccountId]);
 
   return (
     <div className="flex flex-wrap gap-2">
-      {parentCompanies?.map((company) => (
-        <button
-          key={company.parent_company_id}
-          type="button"
-          onClick={() => onSelect(
-            selectedCompanyId === company.parent_company_id ? null : company.parent_company_id
-          )}
-          className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm transition-colors ${
-            selectedCompanyId === company.parent_company_id
-              ? "bg-blue-100 text-blue-700 border-2 border-blue-300"
-              : "bg-gray-100 text-gray-700 border-2 border-transparent hover:border-gray-300"
-          }`}
-        >
-          {selectedCompanyId === company.parent_company_id ? (
-            <Check className="w-4 h-4" />
-          ) : (
-            <X className="w-4 h-4" />
-          )}
-          {company.display_name}
-          {currentAssociation === company.parent_company_id && (
-            <span className="ml-1 text-xs text-blue-600">(Current)</span>
-          )}
-        </button>
-      ))}
+      {parentCompanies?.map((company) => {
+        const isSelected = selectedCompanyId === company.parent_company_id;
+        const isCurrentlyAssociated = currentAssociations.includes(company.parent_company_id);
+        
+        return (
+          <button
+            key={company.parent_company_id}
+            type="button"
+            onClick={() => onSelect(
+              isSelected ? null : company.parent_company_id
+            )}
+            className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm transition-colors ${
+              isSelected
+                ? "bg-blue-100 text-blue-700 border-2 border-blue-300"
+                : "bg-gray-100 text-gray-700 border-2 border-transparent hover:border-gray-300"
+            }`}
+          >
+            {isSelected ? (
+              <Check className="w-4 h-4" />
+            ) : (
+              <X className="w-4 h-4" />
+            )}
+            {company.display_name}
+            {isCurrentlyAssociated && !isSelected && (
+              <span className="ml-1 text-xs text-blue-600">(Current)</span>
+            )}
+          </button>
+        );
+      })}
     </div>
   );
 };

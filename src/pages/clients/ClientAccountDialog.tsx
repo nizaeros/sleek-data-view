@@ -38,7 +38,7 @@ export const ClientAccountDialog = ({
     defaultValues: {
       display_name: "",
       registered_name: "",
-      client_code: "",
+      client_code: "", // Required field
       slug: "",
       location_type: "BRANCH",
       is_active: true,
@@ -138,7 +138,7 @@ export const ClientAccountDialog = ({
           .from("parent_client_association")
           .select("parent_company_id")
           .eq("client_account_id", client.client_account_id)
-          .maybeSingle(); // Changed from single() to maybeSingle()
+          .maybeSingle();
 
         if (!error && data) {
           form.setValue("parent_company_id", data.parent_company_id);
@@ -180,8 +180,8 @@ export const ClientAccountDialog = ({
       const { parent_company_id, ...clientData } = values;
 
       // Ensure required fields are present
-      if (!clientData.client_code) {
-        throw new Error("Client code is required");
+      if (!clientData.client_code || !clientData.display_name || !clientData.registered_name || !clientData.slug) {
+        throw new Error("Required fields are missing");
       }
 
       // Handle client account update/creation
@@ -209,13 +209,20 @@ export const ClientAccountDialog = ({
               client_account_id: savedClient.client_account_id,
               parent_company_id: parent_company_id,
             },
-            { 
-              onConflict: "client_account_id",
-              ignoreDuplicates: false 
+            {
+              onConflict: 'unique_client_parent_association'
             }
           );
 
         if (associationError) throw associationError;
+      } else {
+        // If no parent company is selected, remove any existing association
+        const { error: deleteError } = await supabase
+          .from("parent_client_association")
+          .delete()
+          .eq("client_account_id", savedClient.client_account_id);
+
+        if (deleteError) throw deleteError;
       }
 
       return savedClient;

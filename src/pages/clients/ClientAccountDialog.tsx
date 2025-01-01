@@ -36,8 +36,40 @@ export const ClientAccountDialog = ({
   useEffect(() => {
     if (client) {
       form.reset(client);
+    } else {
+      // Reset form with default values when opening for a new client
+      form.reset({
+        display_name: "",
+        registered_name: "",
+        registration_number: null,
+        client_code: "",
+        slug: "",
+        location_type: "BRANCH",
+        is_active: true,
+        is_client: false,
+        relationship_type: "PROSPECT",
+        relationship_notes: null,
+        address_line1: null,
+        address_line2: null,
+        city: null,
+        state: null,
+        country: null,
+        postal_code: null,
+        gstin: null,
+        tan: null,
+        icn: null,
+        parent_client_account_id: null,
+        headquarters_id: null,
+        industry_id: null,
+        entity_type_id: null,
+        contact_info: null,
+        logo_url: null,
+        parent_company_id: "",
+        website: null,
+        linkedin: null,
+      });
     }
-  }, [client, form]);
+  }, [client, form, open]);
 
   const handleLogoUpload = async (file: File) => {
     const fileExt = file.name.split('.').pop();

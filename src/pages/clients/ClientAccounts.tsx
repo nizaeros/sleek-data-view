@@ -45,16 +45,20 @@ export const ClientAccounts = () => {
         );
       }
 
-      const [totalCount, activeCount, inactiveCount] = await Promise.all([
-        baseQuery,
-        baseQuery.eq("is_active", true),
-        baseQuery.eq("is_active", false),
+      const totalPromise = baseQuery;
+      const activePromise = baseQuery.eq("is_active", true);
+      const inactivePromise = baseQuery.eq("is_active", false);
+
+      const [totalResult, activeResult, inactiveResult] = await Promise.all([
+        totalPromise,
+        activePromise,
+        inactivePromise
       ]);
 
       return {
-        all: totalCount.count || 0,
-        active: activeCount.count || 0,
-        inactive: inactiveCount.count || 0,
+        all: totalResult.count || 0,
+        active: activeResult.count || 0,
+        inactive: inactiveResult.count || 0,
       };
     },
   });
@@ -200,7 +204,6 @@ export const ClientAccounts = () => {
                           variant="ghost" 
                           size="icon"
                           className="h-7 w-7 text-gray-400 hover:text-[#1034A6] transition-colors"
-                          // TODO: Implement dashboard navigation
                           onClick={() => console.log('Navigate to dashboard', client.client_account_id)}
                         >
                           <ArrowRightCircle className="h-4 w-4" />

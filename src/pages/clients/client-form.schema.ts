@@ -1,0 +1,35 @@
+import { z } from "zod";
+import type { Database } from "@/integrations/supabase/types";
+
+export type ClientAccount = Database["public"]["Tables"]["client_accounts"]["Row"];
+export type LocationType = Database["public"]["Enums"]["client_location_type"];
+export type RelationType = Database["public"]["Enums"]["company_relationship_type"];
+
+export const clientFormSchema = z.object({
+  display_name: z.string().min(1, "Display name is required"),
+  registered_name: z.string().min(1, "Registered name is required"),
+  client_code: z.string().min(1, "Client code is required"),
+  slug: z.string().min(1, "Slug is required"),
+  location_type: z.enum(["HEADQUARTERS", "BRANCH"]),
+  is_active: z.boolean().default(true),
+  is_client: z.boolean().default(false),
+  relationship_type: z.enum(["PROSPECT", "CLIENT", "PARTNER", "AFFILIATE"]),
+  relationship_notes: z.string().optional(),
+  address_line1: z.string().optional(),
+  address_line2: z.string().optional(),
+  city: z.string().optional(),
+  state: z.string().optional(),
+  country: z.string().optional(),
+  postal_code: z.string().optional(),
+  gstin: z.string().optional(),
+  tan: z.string().optional(),
+  icn: z.string().optional(),
+  parent_client_account_id: z.string().optional(),
+  headquarters_id: z.string().optional(),
+  industry_id: z.string().optional(),
+  entity_type_id: z.string().optional(),
+  contact_info: z.any().optional(),
+  logo_url: z.string().optional(),
+});
+
+export type ClientFormValues = z.infer<typeof clientFormSchema>;

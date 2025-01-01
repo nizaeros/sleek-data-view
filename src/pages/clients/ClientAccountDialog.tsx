@@ -96,7 +96,16 @@ export const ClientAccountDialog = ({
     form.setValue("logo_url", publicUrl);
   };
 
-  const onSubmit = form.handleSubmit(async (data) => {
+  const onSubmit = async (data: any) => {
+    if (!form.formState.isValid) {
+      toast({
+        title: "Validation Error",
+        description: "Please fill in all required fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (!data.parent_company_id) {
       toast({
         title: "Error",
@@ -115,7 +124,7 @@ export const ClientAccountDialog = ({
         variant: "destructive",
       });
     }
-  });
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -126,7 +135,7 @@ export const ClientAccountDialog = ({
           </DialogTitle>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={onSubmit} className="space-y-6">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <ClientFormFields
               form={form}
               parentAccounts={parentAccounts}
@@ -143,7 +152,10 @@ export const ClientAccountDialog = ({
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={mutation.isPending}>
+              <Button 
+                type="submit" 
+                disabled={mutation.isPending || !form.formState.isValid}
+              >
                 {client ? "Update" : "Create"}
               </Button>
             </div>

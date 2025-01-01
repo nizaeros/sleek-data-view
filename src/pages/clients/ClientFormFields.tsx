@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { UseFormReturn } from "react-hook-form";
 import type { ClientFormValues } from "./client-form.schema";
 import { Upload } from "lucide-react";
-import { ParentCompanyChips } from "./components/ParentCompanyChips";
+import { ParentCompanySection } from "./components/ParentCompanySection";
 
 interface ClientFormFieldsProps {
   form: UseFormReturn<ClientFormValues>;
@@ -94,9 +94,8 @@ export const ClientFormFields = ({
         name="parent_company_id"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Parent Company</FormLabel>
             <FormControl>
-              <ParentCompanyChips
+              <ParentCompanySection
                 selectedCompanyId={field.value}
                 clientAccountId={client?.client_account_id}
                 onSelect={(value) => field.onChange(value)}

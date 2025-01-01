@@ -13,7 +13,7 @@ import { ClientTabs } from "./components/ClientTabs";
 type ClientAccount = Database["public"]["Tables"]["client_accounts"]["Row"];
 type TabType = "all" | "active" | "inactive";
 
-const ITEMS_PER_PAGE = 10;
+const ITEMS_PER_PAGE = 20; // Increased from 10 to reduce number of queries
 
 export const ClientAccounts = () => {
   const [selectedClient, setSelectedClient] = useState<ClientAccount | null>(null);
@@ -21,8 +21,8 @@ export const ClientAccounts = () => {
   const [activeTab, setActiveTab] = useState<TabType>("all");
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Fetch counts for all categories
-  const { data: counts } = useQuery({
+  // Fetch counts with proper stale time and caching
+  const { data: counts, isLoading: isCountsLoading } = useQuery({
     queryKey: ["client-counts", searchQuery],
     queryFn: async () => {
       const createBaseQuery = () => {
@@ -45,6 +45,7 @@ export const ClientAccounts = () => {
         inactive: inactiveCount || 0,
       };
     },
+    staleTime: 30000, // Cache for 30 seconds
   });
 
   const fetchClients = async ({ pageParam = 0 }) => {
@@ -86,6 +87,7 @@ export const ClientAccounts = () => {
         ? pages.length
         : undefined;
     },
+    staleTime: 30000, // Cache for 30 seconds
   });
 
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
@@ -120,8 +122,16 @@ export const ClientAccounts = () => {
     setSearchQuery("");
   };
 
-  if (isLoading) {
-    return <div>Loading...</div>;
+  // Show loading state while initial data is being fetched
+  if (isLoading || isCountsLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#1034A6] mx-auto"></div>
+          <p className="mt-2 text-gray-600">Loading client data...</p>
+        </div>
+      </div>
+    );
   }
 
   const allClients = data?.pages.flatMap(page => page.data || []) || [];

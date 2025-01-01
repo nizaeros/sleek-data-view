@@ -1,20 +1,14 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ClientAccountDialog } from "./ClientAccountDialog";
 import type { Database } from "@/integrations/supabase/types";
-import { Plus, Pencil, ArrowRightCircle } from "lucide-react";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Plus } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { ClientSearch } from "./components/ClientSearch";
+import { ClientTable } from "./components/ClientTable";
+import { ClientTabs } from "./components/ClientTabs";
 
 type ClientAccount = Database["public"]["Tables"]["client_accounts"]["Row"];
 type TabType = "all" | "active" | "inactive";
@@ -25,15 +19,22 @@ export const ClientAccounts = () => {
   const [selectedClient, setSelectedClient] = useState<ClientAccount | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>("all");
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Fetch counts for all categories
   const { data: counts } = useQuery({
-    queryKey: ["client-counts"],
+    queryKey: ["client-counts", searchQuery],
     queryFn: async () => {
+      let baseQuery = supabase.from("client_accounts").select("*", { count: "exact", head: true });
+      
+      if (searchQuery) {
+        baseQuery = baseQuery.ilike("display_name", `%${searchQuery}%`);
+      }
+
       const [totalCount, activeCount, inactiveCount] = await Promise.all([
-        supabase.from("client_accounts").select("*", { count: "exact", head: true }),
-        supabase.from("client_accounts").select("*", { count: "exact", head: true }).eq("is_active", true),
-        supabase.from("client_accounts").select("*", { count: "exact", head: true }).eq("is_active", false),
+        baseQuery,
+        baseQuery.eq("is_active", true),
+        baseQuery.eq("is_active", false),
       ]);
 
       return {
@@ -49,7 +50,10 @@ export const ClientAccounts = () => {
       .from("client_accounts")
       .select("*", { count: "exact" });
 
-    // Apply filter based on active tab
+    if (searchQuery) {
+      query = query.ilike("display_name", `%${searchQuery}%`);
+    }
+
     if (activeTab === "active") {
       query = query.eq("is_active", true);
     } else if (activeTab === "inactive") {
@@ -71,7 +75,7 @@ export const ClientAccounts = () => {
     isLoading,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: ["clients", activeTab],
+    queryKey: ["clients", activeTab, searchQuery],
     queryFn: fetchClients,
     initialPageParam: 0,
     getNextPageParam: (lastPage, pages) => {
@@ -106,94 +110,53 @@ export const ClientAccounts = () => {
     return parts || "-";
   };
 
+  const handleSearchChange = (value: string) => {
+    setSearchQuery(value);
+  };
+
+  const handleClearSearch = () => {
+    setSearchQuery("");
+  };
+
   if (isLoading) {
     return <div>Loading...</div>;
   }
+
+  const allClients = data?.pages.flatMap(page => page.data || []) || [];
 
   return (
     <div className="px-4 sm:px-6 lg:px-6 py-3">
       <div className="flex items-center justify-between mb-3">
         <h1 className="text-base font-semibold text-[#1034A6]">Client Accounts</h1>
-        <Button onClick={handleCreate} size="icon" className="h-8 w-8">
-          <Plus className="h-4 w-4" />
-        </Button>
+        <div className="flex items-center gap-4">
+          <ClientSearch
+            searchQuery={searchQuery}
+            onSearchChange={handleSearchChange}
+            onClearSearch={handleClearSearch}
+          />
+          <Button onClick={handleCreate} size="icon" className="h-8 w-8">
+            <Plus className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
 
-      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as TabType)} className="mb-3">
-        <TabsList>
-          <TabsTrigger value="all">
-            All ({counts?.all || 0})
-          </TabsTrigger>
-          <TabsTrigger value="active">
-            Active ({counts?.active || 0})
-          </TabsTrigger>
-          <TabsTrigger value="inactive">
-            Inactive ({counts?.inactive || 0})
-          </TabsTrigger>
-        </TabsList>
-      </Tabs>
+      <ClientTabs
+        activeTab={activeTab}
+        counts={counts || { all: 0, active: 0, inactive: 0 }}
+        onTabChange={(value) => setActiveTab(value as TabType)}
+      />
 
       <div className="border rounded-md">
         <ScrollArea className="h-[calc(100vh-220px)]" onScroll={handleScroll}>
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-muted/50">
-                <TableHead className="py-1.5">Display Name</TableHead>
-                <TableHead className="py-1.5">Client Code</TableHead>
-                <TableHead className="py-1.5">Location</TableHead>
-                <TableHead className="py-1.5">Location Type</TableHead>
-                <TableHead className="py-1.5">Status</TableHead>
-                <TableHead className="py-1.5 w-[100px]">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {data?.pages.map((page) =>
-                page.data?.map((client) => (
-                  <TableRow key={client.client_account_id} className="hover:bg-muted/50">
-                    <TableCell className="py-1.5">{client.display_name}</TableCell>
-                    <TableCell className="py-1.5">{client.client_code}</TableCell>
-                    <TableCell className="py-1.5">{formatLocation(client)}</TableCell>
-                    <TableCell className="py-1.5">{client.location_type}</TableCell>
-                    <TableCell className="py-1.5">
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                        client.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                      }`}>
-                        {client.is_active ? "Active" : "Inactive"}
-                      </span>
-                    </TableCell>
-                    <TableCell className="py-1.5">
-                      <div className="flex items-center gap-1">
-                        <Button 
-                          variant="ghost" 
-                          size="icon"
-                          onClick={() => handleEdit(client)}
-                          className="h-7 w-7 text-gray-400 hover:text-[#1034A6] transition-colors"
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="icon"
-                          className="h-7 w-7 text-gray-400 hover:text-[#1034A6] transition-colors"
-                          // TODO: Implement dashboard navigation
-                          onClick={() => console.log('Navigate to dashboard', client.client_account_id)}
-                        >
-                          <ArrowRightCircle className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-          {isFetchingNextPage && (
-            <div className="py-4 text-center text-sm text-muted-foreground">
-              Loading more...
-            </div>
-          )}
+          <ClientTable
+            clients={allClients}
+            onEdit={handleEdit}
+            formatLocation={formatLocation}
+            isFetchingNextPage={isFetchingNextPage}
+          />
         </ScrollArea>
       </div>
+
       <ClientAccountDialog
         open={isDialogOpen}
         onOpenChange={setIsDialogOpen}

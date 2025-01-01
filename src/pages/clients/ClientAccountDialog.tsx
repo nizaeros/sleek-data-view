@@ -38,7 +38,7 @@ export const ClientAccountDialog = ({
     defaultValues: {
       display_name: "",
       registered_name: "",
-      client_code: "", // Required field
+      client_code: "",
       slug: "",
       location_type: "BRANCH",
       is_active: true,
@@ -138,7 +138,7 @@ export const ClientAccountDialog = ({
           .from("parent_client_association")
           .select("parent_company_id")
           .eq("client_account_id", client.client_account_id)
-          .single();
+          .maybeSingle(); // Changed from single() to maybeSingle()
 
         if (!error && data) {
           form.setValue("parent_company_id", data.parent_company_id);
@@ -179,6 +179,11 @@ export const ClientAccountDialog = ({
     mutationFn: async (values: ClientFormValues) => {
       const { parent_company_id, ...clientData } = values;
 
+      // Ensure required fields are present
+      if (!clientData.client_code) {
+        throw new Error("Client code is required");
+      }
+
       // Handle client account update/creation
       const { data: savedClient, error: clientError } = client
         ? await supabase
@@ -204,7 +209,10 @@ export const ClientAccountDialog = ({
               client_account_id: savedClient.client_account_id,
               parent_company_id: parent_company_id,
             },
-            { onConflict: "client_account_id" }
+            { 
+              onConflict: "client_account_id",
+              ignoreDuplicates: false 
+            }
           );
 
         if (associationError) throw associationError;

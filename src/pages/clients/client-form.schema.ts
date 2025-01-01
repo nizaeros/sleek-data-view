@@ -13,7 +13,7 @@ export const clientFormSchema = z.object({
   icn: z.string().optional().nullable(),
   entity_type_id: z.string().optional().nullable(),
   industry_id: z.string().optional().nullable(),
-  client_code: z.string().min(1, "Client code is required"), // Made required to match DB
+  client_code: z.string().min(1, "Client code is required"),
   slug: z.string().min(1, "Slug is required"),
   location_type: z.enum(["HEADQUARTERS", "BRANCH"]),
   is_active: z.boolean().default(true),

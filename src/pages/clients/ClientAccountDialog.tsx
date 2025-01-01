@@ -38,6 +38,7 @@ export const ClientAccountDialog = ({
     defaultValues: {
       display_name: "",
       registered_name: "",
+      registration_number: null,
       client_code: "",
       slug: "",
       location_type: "BRANCH",
@@ -60,7 +61,9 @@ export const ClientAccountDialog = ({
       entity_type_id: null,
       contact_info: null,
       logo_url: null,
-      parent_company_id: "", // Initialize with empty string for required field
+      parent_company_id: "",
+      website: null,
+      linkedin: null,
     },
   });
 

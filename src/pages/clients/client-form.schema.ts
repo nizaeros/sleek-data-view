@@ -8,6 +8,7 @@ export type RelationType = Database["public"]["Enums"]["company_relationship_typ
 export const clientFormSchema = z.object({
   display_name: z.string().min(1, "Display name is required"),
   registered_name: z.string().min(1, "Registered name is required"),
+  registration_number: z.string().optional().nullable(),
   gstin: z.string().optional().nullable(),
   tan: z.string().optional().nullable(),
   icn: z.string().optional().nullable(),

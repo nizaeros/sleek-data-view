@@ -2,7 +2,7 @@ import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/comp
 import { Input } from "@/components/ui/input";
 import { UseFormReturn } from "react-hook-form";
 import type { ClientFormValues } from "../../client-form.schema";
-import { Link, Linkedin } from "lucide-react";
+import { Link, Linkedin, Building2 } from "lucide-react";
 
 interface ContactSectionProps {
   form: UseFormReturn<ClientFormValues>;
@@ -39,6 +39,22 @@ export const ContactSection = ({ form }: ContactSectionProps) => {
                 <div className="relative">
                   <Input {...field} className="h-9 pl-9" />
                   <Linkedin className="absolute left-2.5 top-2 h-5 w-5 text-gray-400" />
+                </div>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="registration_number"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Registration Number</FormLabel>
+              <FormControl>
+                <div className="relative">
+                  <Input {...field} className="h-9 pl-9" />
+                  <Building2 className="absolute left-2.5 top-2 h-5 w-5 text-gray-400" />
                 </div>
               </FormControl>
               <FormMessage />

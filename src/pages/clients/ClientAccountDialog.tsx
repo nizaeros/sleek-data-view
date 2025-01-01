@@ -188,13 +188,13 @@ export const ClientAccountDialog = ({
       const { data: savedClient, error: clientError } = client
         ? await supabase
             .from("client_accounts")
-            .update(clientData)
+            .update(clientData as ClientAccount)
             .eq("client_account_id", client.client_account_id)
             .select()
             .single()
         : await supabase
             .from("client_accounts")
-            .insert(clientData)
+            .insert(clientData as ClientAccount)
             .select()
             .single();
 

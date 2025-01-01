@@ -13,7 +13,11 @@ import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ClientFormFields } from "./ClientFormFields";
-import { clientFormSchema, type ClientFormValues, type ClientAccount } from "./client-form.schema";
+import { 
+  clientFormSchema, 
+  type ClientFormValues, 
+  type ClientAccount 
+} from "./client-form.schema";
 
 interface ClientAccountDialogProps {
   open: boolean;
@@ -40,22 +44,22 @@ export const ClientAccountDialog = ({
       is_active: true,
       is_client: false,
       relationship_type: "PROSPECT",
-      relationship_notes: "",
-      address_line1: "",
-      address_line2: "",
-      city: "",
-      state: "",
-      country: "",
-      postal_code: "",
-      gstin: "",
-      tan: "",
-      icn: "",
-      parent_client_account_id: "",
-      headquarters_id: "",
-      industry_id: "",
-      entity_type_id: "",
+      relationship_notes: null,
+      address_line1: null,
+      address_line2: null,
+      city: null,
+      state: null,
+      country: null,
+      postal_code: null,
+      gstin: null,
+      tan: null,
+      icn: null,
+      parent_client_account_id: null,
+      headquarters_id: null,
+      industry_id: null,
+      entity_type_id: null,
       contact_info: null,
-      logo_url: "",
+      logo_url: null,
     },
   });
 

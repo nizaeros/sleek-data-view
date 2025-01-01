@@ -55,6 +55,7 @@ export const ClientAccounts = () => {
   } = useInfiniteQuery({
     queryKey: ["clients", activeTab],
     queryFn: fetchClients,
+    initialPageParam: 0,
     getNextPageParam: (lastPage, pages) => {
       if (!lastPage.count) return undefined;
       return pages.length * ITEMS_PER_PAGE < lastPage.count

@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useToast } from "@/hooks/use-toast";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { clientFormSchema, type ClientFormValues, type ClientAccount } from "../client-form.schema";
 
@@ -45,12 +45,14 @@ export const useClientForm = (client: ClientAccount | null, onSuccess: () => voi
 
   const mutation = useMutation({
     mutationFn: async (values: ClientFormValues) => {
+      console.log("Starting mutation with values:", values);
       const { parent_company_id, ...clientData } = values;
 
       if (!parent_company_id) {
         throw new Error("Parent company selection is required");
       }
 
+      console.log("Inserting/updating client account");
       const { data: savedClient, error: clientError } = client
         ? await supabase
             .from("client_accounts")
@@ -64,8 +66,14 @@ export const useClientForm = (client: ClientAccount | null, onSuccess: () => voi
             .select()
             .single();
 
-      if (clientError) throw clientError;
+      if (clientError) {
+        console.error("Error saving client:", clientError);
+        throw clientError;
+      }
 
+      console.log("Saved client:", savedClient);
+
+      console.log("Upserting parent client association");
       const { error: associationError } = await supabase
         .from("parent_client_association")
         .upsert(
@@ -78,11 +86,15 @@ export const useClientForm = (client: ClientAccount | null, onSuccess: () => voi
           }
         );
 
-      if (associationError) throw associationError;
+      if (associationError) {
+        console.error("Error saving association:", associationError);
+        throw associationError;
+      }
 
       return savedClient;
     },
     onSuccess: () => {
+      console.log("Mutation completed successfully");
       queryClient.invalidateQueries({ queryKey: ["clients"] });
       toast({
         title: `Client ${client ? "updated" : "created"} successfully`,
@@ -90,6 +102,7 @@ export const useClientForm = (client: ClientAccount | null, onSuccess: () => voi
       onSuccess();
     },
     onError: (error) => {
+      console.error("Mutation error:", error);
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "An error occurred",

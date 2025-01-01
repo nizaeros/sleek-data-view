@@ -96,7 +96,8 @@ export const ClientAccountDialog = ({
   };
 
   const onSubmit = async (data: any) => {
-    // Remove the initial validation check since form.handleSubmit already handles this
+    console.log("Form submission started", data);
+    
     if (!data.parent_company_id) {
       toast({
         title: "Error",
@@ -107,8 +108,11 @@ export const ClientAccountDialog = ({
     }
     
     try {
+      console.log("Calling mutation with data:", data);
       await mutation.mutateAsync(data);
+      console.log("Mutation completed successfully");
     } catch (error) {
+      console.error("Mutation error:", error);
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "An error occurred while saving",

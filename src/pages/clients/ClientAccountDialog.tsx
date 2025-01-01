@@ -28,6 +28,24 @@ interface ClientAccountDialogProps {
   client: ClientAccount | null;
 }
 
+type FormValues = {
+  display_name: string;
+  registered_name: string;
+  client_code: string;
+  slug: string;
+  location_type: "HEADQUARTERS" | "BRANCH";
+  address_line1: string;
+  address_line2: string;
+  city: string;
+  state: string;
+  country: string;
+  postal_code: string;
+  gstin: string;
+  tan: string;
+  icn: string;
+  parent_client_account_id: string;
+};
+
 export const ClientAccountDialog = ({
   open,
   onOpenChange,
@@ -35,7 +53,7 @@ export const ClientAccountDialog = ({
 }: ClientAccountDialogProps) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const form = useForm({
+  const form = useForm<FormValues>({
     defaultValues: {
       display_name: client?.display_name || "",
       registered_name: client?.registered_name || "",
@@ -56,7 +74,7 @@ export const ClientAccountDialog = ({
   });
 
   const mutation = useMutation({
-    mutationFn: async (values: typeof form.getValues()) => {
+    mutationFn: async (values: FormValues) => {
       const { data: clientData, error: clientError } = client
         ? await supabase
             .from("client_accounts")
@@ -167,7 +185,6 @@ export const ClientAccountDialog = ({
                   </FormItem>
                 )}
               />
-              {/* Add more form fields for other client account properties */}
             </div>
             <div className="flex justify-end gap-2">
               <Button

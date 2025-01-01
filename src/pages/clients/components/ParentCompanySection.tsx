@@ -4,17 +4,17 @@ import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
-interface ParentCompanyChipsProps {
+interface ParentCompanySectionProps {
   selectedCompanyId: string | null;
   clientAccountId?: string;
   onSelect: (companyId: string | null) => void;
 }
 
-export const ParentCompanyChips = ({
+export const ParentCompanySection = ({
   selectedCompanyId,
   clientAccountId,
   onSelect,
-}: ParentCompanyChipsProps) => {
+}: ParentCompanySectionProps) => {
   const { toast } = useToast();
   const [currentAssociations, setCurrentAssociations] = useState<string[]>([]);
 
@@ -115,34 +115,37 @@ export const ParentCompanyChips = ({
   };
 
   return (
-    <div className="space-y-2">
-      {parentCompanies?.map((company) => {
-        const isAssociated = currentAssociations.includes(company.parent_company_id);
-        const isSelected = selectedCompanyId === company.parent_company_id;
-        
-        return (
-          <div 
-            key={company.parent_company_id}
-            className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 transition-colors"
-          >
-            <span className="font-medium">{company.display_name}</span>
-            <button
-              type="button"
-              onClick={() => handleToggle(company.parent_company_id)}
-              className="flex items-center gap-2 text-sm"
+    <div className="space-y-4">
+      <h3 className="text-lg font-medium">Parent Company Selection</h3>
+      <div className="space-y-2">
+        {parentCompanies?.map((company) => {
+          const isAssociated = currentAssociations.includes(company.parent_company_id);
+          const isSelected = selectedCompanyId === company.parent_company_id;
+          
+          return (
+            <div 
+              key={company.parent_company_id}
+              className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 transition-colors"
             >
-              {isAssociated ? (
-                <ToggleRight className={`w-6 h-6 ${isSelected ? "text-blue-600" : "text-gray-400"}`} />
-              ) : (
-                <ToggleLeft className="w-6 h-6 text-gray-400" />
-              )}
-              <span className={isAssociated ? "text-blue-600" : "text-gray-500"}>
-                {isAssociated ? "Associated" : "Not Associated"}
-              </span>
-            </button>
-          </div>
-        );
-      })}
+              <span className="font-medium">{company.display_name}</span>
+              <button
+                type="button"
+                onClick={() => handleToggle(company.parent_company_id)}
+                className="flex items-center gap-2 text-sm"
+              >
+                {isAssociated ? (
+                  <ToggleRight className={`w-6 h-6 ${isSelected ? "text-blue-600" : "text-gray-400"}`} />
+                ) : (
+                  <ToggleLeft className="w-6 h-6 text-gray-400" />
+                )}
+                <span className={isAssociated ? "text-blue-600" : "text-gray-500"}>
+                  {isAssociated ? "Associated" : "Not Associated"}
+                </span>
+              </button>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 };

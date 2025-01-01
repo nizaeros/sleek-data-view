@@ -1,4 +1,4 @@
-import { Check, X } from "lucide-react";
+import { ToggleLeft, ToggleRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
@@ -65,34 +65,34 @@ export const ParentCompanyChips = ({
   }, [clientAccountId]);
 
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="space-y-2">
       {parentCompanies?.map((company) => {
+        const isAssociated = currentAssociations.includes(company.parent_company_id);
         const isSelected = selectedCompanyId === company.parent_company_id;
-        const isCurrentlyAssociated = currentAssociations.includes(company.parent_company_id);
         
         return (
-          <button
+          <div 
             key={company.parent_company_id}
-            type="button"
-            onClick={() => onSelect(
-              isSelected ? null : company.parent_company_id
-            )}
-            className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm transition-colors ${
-              isSelected
-                ? "bg-blue-100 text-blue-700 border-2 border-blue-300"
-                : "bg-gray-100 text-gray-700 border-2 border-transparent hover:border-gray-300"
-            }`}
+            className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 transition-colors"
           >
-            {isSelected ? (
-              <Check className="w-4 h-4" />
-            ) : (
-              <X className="w-4 h-4" />
-            )}
-            {company.display_name}
-            {isCurrentlyAssociated && !isSelected && (
-              <span className="ml-1 text-xs text-blue-600">(Current)</span>
-            )}
-          </button>
+            <span className="font-medium">{company.display_name}</span>
+            <button
+              type="button"
+              onClick={() => onSelect(
+                isSelected ? null : company.parent_company_id
+              )}
+              className="flex items-center gap-2 text-sm"
+            >
+              {isAssociated ? (
+                <ToggleRight className={`w-6 h-6 ${isSelected ? "text-blue-600" : "text-gray-400"}`} />
+              ) : (
+                <ToggleLeft className="w-6 h-6 text-gray-400" />
+              )}
+              <span className={isAssociated ? "text-blue-600" : "text-gray-500"}>
+                {isAssociated ? "Associated" : "Not Associated"}
+              </span>
+            </button>
+          </div>
         );
       })}
     </div>

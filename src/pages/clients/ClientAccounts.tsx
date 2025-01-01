@@ -13,9 +13,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { ClientAccountDialog } from "./ClientAccountDialog";
 import type { Database } from "@/integrations/supabase/types";
 import { Plus, Pencil, ArrowRightCircle } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ClientSearch } from "./components/ClientSearch";
-import { ClientTabs } from "./components/ClientTabs";
 
 type ClientAccount = Database["public"]["Tables"]["client_accounts"]["Row"];
 type TabType = "all" | "active" | "inactive";
@@ -26,42 +25,21 @@ export const ClientAccounts = () => {
   const [selectedClient, setSelectedClient] = useState<ClientAccount | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>("all");
-  const [searchQuery, setSearchQuery] = useState("");
 
-  // Fetch counts for all categories with search filter
+  // Fetch counts for all categories
   const { data: counts } = useQuery({
-    queryKey: ["client-counts", searchQuery],
+    queryKey: ["client-counts"],
     queryFn: async () => {
-      // Create base query for counting
-      let query = supabase.from("client_accounts").select("*", { count: "exact", head: true });
-      
-      // Apply search filter if exists
-      if (searchQuery) {
-        query = query.or(
-          `display_name.ilike.%${searchQuery}%,` +
-          `client_code.ilike.%${searchQuery}%,` +
-          `city.ilike.%${searchQuery}%,` +
-          `state.ilike.%${searchQuery}%,` +
-          `country.ilike.%${searchQuery}%`
-        );
-      }
-
-      // Create separate queries for each count to avoid filter interference
-      const totalQuery = query;
-      const activeQuery = query.eq('is_active', true);
-      const inactiveQuery = query.eq('is_active', false);
-
-      // Execute all count queries in parallel
-      const [{ count: totalCount }, { count: activeCount }, { count: inactiveCount }] = await Promise.all([
-        totalQuery,
-        activeQuery,
-        inactiveQuery
+      const [totalCount, activeCount, inactiveCount] = await Promise.all([
+        supabase.from("client_accounts").select("*", { count: "exact", head: true }),
+        supabase.from("client_accounts").select("*", { count: "exact", head: true }).eq("is_active", true),
+        supabase.from("client_accounts").select("*", { count: "exact", head: true }).eq("is_active", false),
       ]);
 
       return {
-        all: totalCount || 0,
-        active: activeCount || 0,
-        inactive: inactiveCount || 0,
+        all: totalCount.count || 0,
+        active: activeCount.count || 0,
+        inactive: inactiveCount.count || 0,
       };
     },
   });
@@ -70,17 +48,6 @@ export const ClientAccounts = () => {
     let query = supabase
       .from("client_accounts")
       .select("*", { count: "exact" });
-
-    // Apply search filter if exists
-    if (searchQuery) {
-      query = query.or(
-        `display_name.ilike.%${searchQuery}%,` +
-        `client_code.ilike.%${searchQuery}%,` +
-        `city.ilike.%${searchQuery}%,` +
-        `state.ilike.%${searchQuery}%,` +
-        `country.ilike.%${searchQuery}%`
-      );
-    }
 
     // Apply filter based on active tab
     if (activeTab === "active") {
@@ -104,7 +71,7 @@ export const ClientAccounts = () => {
     isLoading,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: ["clients", activeTab, searchQuery],
+    queryKey: ["clients", activeTab],
     queryFn: fetchClients,
     initialPageParam: 0,
     getNextPageParam: (lastPage, pages) => {
@@ -152,18 +119,19 @@ export const ClientAccounts = () => {
         </Button>
       </div>
 
-      <div className="flex items-center justify-between mb-3">
-        <ClientTabs
-          activeTab={activeTab}
-          onTabChange={(value) => setActiveTab(value as TabType)}
-          counts={counts || { all: 0, active: 0, inactive: 0 }}
-        />
-        <ClientSearch
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          onClear={() => setSearchQuery("")}
-        />
-      </div>
+      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as TabType)} className="mb-3">
+        <TabsList>
+          <TabsTrigger value="all">
+            All ({counts?.all || 0})
+          </TabsTrigger>
+          <TabsTrigger value="active">
+            Active ({counts?.active || 0})
+          </TabsTrigger>
+          <TabsTrigger value="inactive">
+            Inactive ({counts?.inactive || 0})
+          </TabsTrigger>
+        </TabsList>
+      </Tabs>
 
       <div className="border rounded-md">
         <ScrollArea className="h-[calc(100vh-220px)]" onScroll={handleScroll}>
@@ -207,6 +175,7 @@ export const ClientAccounts = () => {
                           variant="ghost" 
                           size="icon"
                           className="h-7 w-7 text-gray-400 hover:text-[#1034A6] transition-colors"
+                          // TODO: Implement dashboard navigation
                           onClick={() => console.log('Navigate to dashboard', client.client_account_id)}
                         >
                           <ArrowRightCircle className="h-4 w-4" />

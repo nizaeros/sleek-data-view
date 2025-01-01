@@ -12,6 +12,7 @@ import type { ClientAccount } from "./client-form.schema";
 import { useClientForm } from "./hooks/useClientForm";
 import { useClientData } from "./hooks/useClientData";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface ClientAccountDialogProps {
   open: boolean;
@@ -29,6 +30,7 @@ export const ClientAccountDialog = ({
     form.reset();
   });
 
+  const { toast } = useToast();
   const { parentAccounts, industries, entityTypes } = useClientData();
 
   useEffect(() => {

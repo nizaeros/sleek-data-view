@@ -1,6 +1,4 @@
 import { useEffect } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -9,15 +7,11 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Form } from "@/components/ui/form";
-import { useToast } from "@/hooks/use-toast";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { ClientFormFields } from "./ClientFormFields";
-import { 
-  clientFormSchema, 
-  type ClientFormValues, 
-  type ClientAccount 
-} from "./client-form.schema";
+import type { ClientAccount } from "./client-form.schema";
+import { useClientForm } from "./hooks/useClientForm";
+import { useClientData } from "./hooks/useClientData";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ClientAccountDialogProps {
   open: boolean;
@@ -30,91 +24,12 @@ export const ClientAccountDialog = ({
   onOpenChange,
   client,
 }: ClientAccountDialogProps) => {
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
-
-  const form = useForm<ClientFormValues>({
-    resolver: zodResolver(clientFormSchema),
-    defaultValues: {
-      display_name: "",
-      registered_name: "",
-      registration_number: null,
-      client_code: "",
-      slug: "",
-      location_type: "BRANCH",
-      is_active: true,
-      is_client: false,
-      relationship_type: "PROSPECT",
-      relationship_notes: null,
-      address_line1: null,
-      address_line2: null,
-      city: null,
-      state: null,
-      country: null,
-      postal_code: null,
-      gstin: null,
-      tan: null,
-      icn: null,
-      parent_client_account_id: null,
-      headquarters_id: null,
-      industry_id: null,
-      entity_type_id: null,
-      contact_info: null,
-      logo_url: null,
-      parent_company_id: "",
-      website: null,
-      linkedin: null,
-    },
+  const { form, mutation } = useClientForm(client, () => {
+    onOpenChange(false);
+    form.reset();
   });
 
-  // Fetch parent accounts
-  const { data: parentAccounts } = useQuery({
-    queryKey: ["parent-accounts"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("client_accounts")
-        .select("client_account_id, display_name")
-        .eq("location_type", "HEADQUARTERS");
-      
-      if (error) throw error;
-      return data.map(account => ({
-        value: account.client_account_id,
-        label: account.display_name,
-      }));
-    },
-  });
-
-  // Fetch industries
-  const { data: industries } = useQuery({
-    queryKey: ["industries"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("industries")
-        .select("industry_id, industry_name");
-      
-      if (error) throw error;
-      return data.map(industry => ({
-        value: industry.industry_id,
-        label: industry.industry_name,
-      }));
-    },
-  });
-
-  // Fetch entity types
-  const { data: entityTypes } = useQuery({
-    queryKey: ["entity-types"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("entity_types")
-        .select("entity_type_id, type_name");
-      
-      if (error) throw error;
-      return data.map(type => ({
-        value: type.entity_type_id,
-        label: type.type_name,
-      }));
-    },
-  });
+  const { parentAccounts, industries, entityTypes } = useClientData();
 
   useEffect(() => {
     if (client) {
@@ -147,64 +62,6 @@ export const ClientAccountDialog = ({
     form.setValue("logo_url", publicUrl);
   };
 
-  const mutation = useMutation({
-    mutationFn: async (values: ClientFormValues) => {
-      const { parent_company_id, ...clientData } = values;
-
-      if (!parent_company_id) {
-        throw new Error("Parent company selection is required");
-      }
-
-      // Handle client account update/creation
-      const { data: savedClient, error: clientError } = client
-        ? await supabase
-            .from("client_accounts")
-            .update(clientData as ClientAccount)
-            .eq("client_account_id", client.client_account_id)
-            .select()
-            .single()
-        : await supabase
-            .from("client_accounts")
-            .insert(clientData as ClientAccount)
-            .select()
-            .single();
-
-      if (clientError) throw clientError;
-
-      // Handle parent company association
-      const { error: associationError } = await supabase
-        .from("parent_client_association")
-        .upsert(
-          {
-            client_account_id: savedClient.client_account_id,
-            parent_company_id: parent_company_id,
-          },
-          {
-            onConflict: "client_account_id,parent_company_id",
-          }
-        );
-
-      if (associationError) throw associationError;
-
-      return savedClient;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["clients"] });
-      toast({
-        title: `Client ${client ? "updated" : "created"} successfully`,
-      });
-      onOpenChange(false);
-      form.reset();
-    },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "An error occurred",
-        variant: "destructive",
-      });
-    },
-  });
-
   const onSubmit = form.handleSubmit((data) => {
     mutation.mutate(data);
   });
@@ -221,9 +78,9 @@ export const ClientAccountDialog = ({
           <form onSubmit={onSubmit} className="space-y-6">
             <ClientFormFields
               form={form}
-              parentAccounts={parentAccounts || []}
-              industries={industries || []}
-              entityTypes={entityTypes || []}
+              parentAccounts={parentAccounts}
+              industries={industries}
+              entityTypes={entityTypes}
               onLogoUpload={handleLogoUpload}
               client={client}
             />

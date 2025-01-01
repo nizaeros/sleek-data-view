@@ -64,8 +64,25 @@ export const ClientAccountDialog = ({
     form.setValue("logo_url", publicUrl);
   };
 
-  const onSubmit = form.handleSubmit((data) => {
-    mutation.mutate(data);
+  const onSubmit = form.handleSubmit(async (data) => {
+    if (!data.parent_company_id) {
+      toast({
+        title: "Error",
+        description: "Please select a parent company",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    try {
+      await mutation.mutateAsync(data);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "An error occurred while saving",
+        variant: "destructive",
+      });
+    }
   });
 
   return (
@@ -94,7 +111,7 @@ export const ClientAccountDialog = ({
               >
                 Cancel
               </Button>
-              <Button type="submit">
+              <Button type="submit" disabled={mutation.isPending}>
                 {client ? "Update" : "Create"}
               </Button>
             </div>

@@ -94,14 +94,14 @@ export const ClientAccounts = () => {
                       variant="ghost" 
                       size="icon"
                       onClick={() => handleEdit(client)}
-                      className="h-7 w-7"
+                      className="h-7 w-7 text-gray-400 hover:text-[#1034A6] transition-colors"
                     >
                       <Pencil className="h-4 w-4" />
                     </Button>
                     <Button 
                       variant="ghost" 
                       size="icon"
-                      className="h-7 w-7"
+                      className="h-7 w-7 text-gray-400 hover:text-[#1034A6] transition-colors"
                       // TODO: Implement dashboard navigation
                       onClick={() => console.log('Navigate to dashboard', client.client_account_id)}
                     >

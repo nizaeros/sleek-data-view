@@ -8,7 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ClientAccountDialog } from "./ClientAccountDialog";
 import type { Database } from "@/integrations/supabase/types";
@@ -25,6 +25,24 @@ export const ClientAccounts = () => {
   const [selectedClient, setSelectedClient] = useState<ClientAccount | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>("all");
+
+  // Fetch counts for all categories
+  const { data: counts } = useQuery({
+    queryKey: ["client-counts"],
+    queryFn: async () => {
+      const [totalCount, activeCount, inactiveCount] = await Promise.all([
+        supabase.from("client_accounts").select("*", { count: "exact", head: true }),
+        supabase.from("client_accounts").select("*", { count: "exact", head: true }).eq("is_active", true),
+        supabase.from("client_accounts").select("*", { count: "exact", head: true }).eq("is_active", false),
+      ]);
+
+      return {
+        all: totalCount.count || 0,
+        active: activeCount.count || 0,
+        inactive: inactiveCount.count || 0,
+      };
+    },
+  });
 
   const fetchClients = async ({ pageParam = 0 }) => {
     let query = supabase
@@ -88,11 +106,6 @@ export const ClientAccounts = () => {
     return parts || "-";
   };
 
-  // Calculate counts for tabs
-  const allCount = data?.pages[0]?.count || 0;
-  const activeCount = data?.pages.flatMap(page => page.data).filter(client => client.is_active).length || 0;
-  const inactiveCount = data?.pages.flatMap(page => page.data).filter(client => !client.is_active).length || 0;
-
   if (isLoading) {
     return <div>Loading...</div>;
   }
@@ -109,13 +122,13 @@ export const ClientAccounts = () => {
       <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as TabType)} className="mb-3">
         <TabsList>
           <TabsTrigger value="all">
-            All ({allCount})
+            All ({counts?.all || 0})
           </TabsTrigger>
           <TabsTrigger value="active">
-            Active ({activeCount})
+            Active ({counts?.active || 0})
           </TabsTrigger>
           <TabsTrigger value="inactive">
-            Inactive ({inactiveCount})
+            Inactive ({counts?.inactive || 0})
           </TabsTrigger>
         </TabsList>
       </Tabs>

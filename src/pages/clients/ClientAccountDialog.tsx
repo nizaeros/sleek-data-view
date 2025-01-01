@@ -18,7 +18,6 @@ import {
   type ClientFormValues, 
   type ClientAccount 
 } from "./client-form.schema";
-import { ParentCompanyChips } from "./components/ParentCompanyChips";
 
 interface ClientAccountDialogProps {
   open: boolean;
@@ -197,7 +196,7 @@ export const ClientAccountDialog = ({
     onError: (error) => {
       toast({
         title: "Error",
-        description: error.message,
+        description: error instanceof Error ? error.message : "An error occurred",
         variant: "destructive",
       });
     },

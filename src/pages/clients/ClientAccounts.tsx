@@ -12,7 +12,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ClientAccountDialog } from "./ClientAccountDialog";
 import type { Database } from "@/integrations/supabase/types";
-import { Plus } from "lucide-react";
+import { Plus, Pencil, ArrowRightCircle } from "lucide-react";
 
 type ClientAccount = Database["public"]["Tables"]["client_accounts"]["Row"];
 
@@ -71,7 +71,7 @@ export const ClientAccounts = () => {
               <TableHead className="py-1.5">Location</TableHead>
               <TableHead className="py-1.5">Location Type</TableHead>
               <TableHead className="py-1.5">Status</TableHead>
-              <TableHead className="py-1.5 w-[80px]">Actions</TableHead>
+              <TableHead className="py-1.5 w-[100px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -89,14 +89,25 @@ export const ClientAccounts = () => {
                   </span>
                 </TableCell>
                 <TableCell className="py-1.5">
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
-                    onClick={() => handleEdit(client)}
-                    className="h-7 px-2"
-                  >
-                    Edit
-                  </Button>
+                  <div className="flex items-center gap-1">
+                    <Button 
+                      variant="ghost" 
+                      size="icon"
+                      onClick={() => handleEdit(client)}
+                      className="h-7 w-7"
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="icon"
+                      className="h-7 w-7"
+                      // TODO: Implement dashboard navigation
+                      onClick={() => console.log('Navigate to dashboard', client.client_account_id)}
+                    >
+                      <ArrowRightCircle className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </TableCell>
               </TableRow>
             ))}

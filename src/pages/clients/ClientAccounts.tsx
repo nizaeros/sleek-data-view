@@ -32,11 +32,12 @@ export const ClientAccounts = () => {
   const { data: counts } = useQuery({
     queryKey: ["client-counts", searchQuery],
     queryFn: async () => {
-      let baseQuery = supabase.from("client_accounts").select("*", { count: "exact", head: true });
+      // Create base query for counting
+      let query = supabase.from("client_accounts").select("*", { count: "exact", head: true });
       
       // Apply search filter if exists
       if (searchQuery) {
-        baseQuery = baseQuery.or(
+        query = query.or(
           `display_name.ilike.%${searchQuery}%,` +
           `client_code.ilike.%${searchQuery}%,` +
           `city.ilike.%${searchQuery}%,` +
@@ -45,20 +46,22 @@ export const ClientAccounts = () => {
         );
       }
 
-      const totalPromise = baseQuery;
-      const activePromise = baseQuery.eq("is_active", true);
-      const inactivePromise = baseQuery.eq("is_active", false);
+      // Create separate queries for each count to avoid filter interference
+      const totalQuery = query;
+      const activeQuery = query.eq('is_active', true);
+      const inactiveQuery = query.eq('is_active', false);
 
-      const [totalResult, activeResult, inactiveResult] = await Promise.all([
-        totalPromise,
-        activePromise,
-        inactivePromise
+      // Execute all count queries in parallel
+      const [{ count: totalCount }, { count: activeCount }, { count: inactiveCount }] = await Promise.all([
+        totalQuery,
+        activeQuery,
+        inactiveQuery
       ]);
 
       return {
-        all: totalResult.count || 0,
-        active: activeResult.count || 0,
-        inactive: inactiveResult.count || 0,
+        all: totalCount || 0,
+        active: activeCount || 0,
+        inactive: inactiveCount || 0,
       };
     },
   });

@@ -1,12 +1,12 @@
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import { Textarea } from "@/components/ui/textarea";
 import { UseFormReturn } from "react-hook-form";
 import type { ClientFormValues } from "./client-form.schema";
-import { Upload, Link, Linkedin } from "lucide-react";
-import { ParentCompanySection } from "./components/ParentCompanySection";
+import { Upload } from "lucide-react";
+import { GeneralSection } from "./components/form-sections/GeneralSection";
+import { CompanyStatusSection } from "./components/form-sections/CompanyStatusSection";
+import { ContactSection } from "./components/form-sections/ContactSection";
+import { AddressSection } from "./components/form-sections/AddressSection";
 
 interface ClientFormFieldsProps {
   form: UseFormReturn<ClientFormValues>;
@@ -33,106 +33,79 @@ export const ClientFormFields = ({
   };
 
   return (
-    <div className="space-y-6">
-      {/* General Information Section */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-medium">General Information</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="display_name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Display Name</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="client_code"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Client Code</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="location_type"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Location Type</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+    <div className="space-y-4 max-w-5xl mx-auto">
+      <div className="grid grid-cols-1 gap-4">
+        <GeneralSection form={form} parentAccounts={parentAccounts} />
+        
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-4">
+            <CompanyStatusSection form={form} client={client} />
+            <ContactSection form={form} />
+          </div>
+          <AddressSection form={form} />
+        </div>
+
+        {/* Registration & Tax Information */}
+        <div className="space-y-3 p-4 border rounded-lg bg-white">
+          <h3 className="text-lg font-medium border-b pb-2">Registration & Tax Information</h3>
+          <div className="grid grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="registered_name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Registered Name</FormLabel>
                   <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select location type" />
-                    </SelectTrigger>
+                    <Input {...field} className="h-9" />
                   </FormControl>
-                  <SelectContent>
-                    <SelectItem value="HEADQUARTERS">Headquarters</SelectItem>
-                    <SelectItem value="BRANCH">Branch</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="relationship_type"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Relationship Type</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="gstin"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>GSTIN</FormLabel>
                   <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select relationship type" />
-                    </SelectTrigger>
+                    <Input {...field} className="h-9" />
                   </FormControl>
-                  <SelectContent>
-                    <SelectItem value="PROSPECT">Prospect</SelectItem>
-                    <SelectItem value="CLIENT">Client</SelectItem>
-                    <SelectItem value="PARTNER">Partner</SelectItem>
-                    <SelectItem value="AFFILIATE">Affiliate</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="parent_client_account_id"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Parent Client</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value || ""}>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="tan"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>TAN</FormLabel>
                   <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select parent client" />
-                    </SelectTrigger>
+                    <Input {...field} className="h-9" />
                   </FormControl>
-                  <SelectContent>
-                    {parentAccounts.map((account) => (
-                      <SelectItem key={account.value} value={account.value}>
-                        {account.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          {/* Logo Upload */}
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="icn"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>ICN</FormLabel>
+                  <FormControl>
+                    <Input {...field} className="h-9" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        </div>
+
+        {/* Logo Upload */}
+        <div className="p-4 border rounded-lg bg-white">
           <FormField
             control={form.control}
             name="logo_url"
@@ -140,7 +113,7 @@ export const ClientFormFields = ({
               <FormItem>
                 <FormLabel>Company Logo</FormLabel>
                 <FormControl>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-4">
                     <Input
                       type="file"
                       accept="image/*"
@@ -170,307 +143,6 @@ export const ClientFormFields = ({
           />
         </div>
       </div>
-
-      {/* Company Status Section */}
-      <div className="space-y-4 border rounded-lg p-4">
-        <h3 className="text-lg font-medium">Company Status</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <FormField
-            control={form.control}
-            name="is_active"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
-                <FormLabel>Active Status</FormLabel>
-                <FormControl>
-                  <Switch
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="is_client"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
-                <FormLabel>Is Client</FormLabel>
-                <FormControl>
-                  <Switch
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-        </div>
-
-        {/* Parent Company Selection */}
-        <FormField
-          control={form.control}
-          name="parent_company_id"
-          render={({ field }) => (
-            <FormItem>
-              <FormControl>
-                <ParentCompanySection
-                  selectedCompanyId={field.value}
-                  clientAccountId={client?.client_account_id}
-                  onSelect={(value) => field.onChange(value)}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
-
-      {/* Registration and Tax Information */}
-      <div className="space-y-4 border rounded-lg p-4">
-        <h3 className="text-lg font-medium">Registration & Tax Information</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="registered_name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Registered Name</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="gstin"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>GSTIN</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="tan"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>TAN</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="icn"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>ICN</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="entity_type_id"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Entity Type</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value || ""}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select entity type" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {entityTypes.map((type) => (
-                      <SelectItem key={type.value} value={type.value}>
-                        {type.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="industry_id"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Industry</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value || ""}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select industry" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {industries.map((industry) => (
-                      <SelectItem key={industry.value} value={industry.value}>
-                        {industry.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-      </div>
-
-      {/* Contact Information Section */}
-      <div className="space-y-4 border rounded-lg p-4">
-        <h3 className="text-lg font-medium">Contact Information</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="website"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Website URL</FormLabel>
-                <FormControl>
-                  <div className="relative">
-                    <Input {...field} />
-                    <Link className="absolute right-3 top-2.5 h-5 w-5 text-gray-400" />
-                  </div>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="linkedin"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>LinkedIn URL</FormLabel>
-                <FormControl>
-                  <div className="relative">
-                    <Input {...field} />
-                    <Linkedin className="absolute right-3 top-2.5 h-5 w-5 text-gray-400" />
-                  </div>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-      </div>
-
-      {/* Address Information */}
-      <div className="space-y-4 border rounded-lg p-4">
-        <h3 className="text-lg font-medium">Address Information</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="address_line1"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Address Line 1</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="address_line2"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Address Line 2</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="city"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>City</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="state"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>State</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="country"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Country</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="postal_code"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Postal Code</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-      </div>
-
-      {/* Relationship Notes */}
-      <FormField
-        control={form.control}
-        name="relationship_notes"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Relationship Notes</FormLabel>
-            <FormControl>
-              <Textarea {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
     </div>
   );
 };

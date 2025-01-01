@@ -13,8 +13,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { ClientAccountDialog } from "./ClientAccountDialog";
 import type { Database } from "@/integrations/supabase/types";
 import { Plus, Pencil, ArrowRightCircle } from "lucide-react";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { ClientSearch } from "./components/ClientSearch";
+import { ClientTabs } from "./components/ClientTabs";
 
 type ClientAccount = Database["public"]["Tables"]["client_accounts"]["Row"];
 type TabType = "all" | "active" | "inactive";
@@ -25,15 +26,29 @@ export const ClientAccounts = () => {
   const [selectedClient, setSelectedClient] = useState<ClientAccount | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>("all");
+  const [searchQuery, setSearchQuery] = useState("");
 
-  // Fetch counts for all categories
+  // Fetch counts for all categories with search filter
   const { data: counts } = useQuery({
-    queryKey: ["client-counts"],
+    queryKey: ["client-counts", searchQuery],
     queryFn: async () => {
+      let baseQuery = supabase.from("client_accounts").select("*", { count: "exact", head: true });
+      
+      // Apply search filter if exists
+      if (searchQuery) {
+        baseQuery = baseQuery.or(
+          `display_name.ilike.%${searchQuery}%,` +
+          `client_code.ilike.%${searchQuery}%,` +
+          `city.ilike.%${searchQuery}%,` +
+          `state.ilike.%${searchQuery}%,` +
+          `country.ilike.%${searchQuery}%`
+        );
+      }
+
       const [totalCount, activeCount, inactiveCount] = await Promise.all([
-        supabase.from("client_accounts").select("*", { count: "exact", head: true }),
-        supabase.from("client_accounts").select("*", { count: "exact", head: true }).eq("is_active", true),
-        supabase.from("client_accounts").select("*", { count: "exact", head: true }).eq("is_active", false),
+        baseQuery,
+        baseQuery.eq("is_active", true),
+        baseQuery.eq("is_active", false),
       ]);
 
       return {
@@ -48,6 +63,17 @@ export const ClientAccounts = () => {
     let query = supabase
       .from("client_accounts")
       .select("*", { count: "exact" });
+
+    // Apply search filter if exists
+    if (searchQuery) {
+      query = query.or(
+        `display_name.ilike.%${searchQuery}%,` +
+        `client_code.ilike.%${searchQuery}%,` +
+        `city.ilike.%${searchQuery}%,` +
+        `state.ilike.%${searchQuery}%,` +
+        `country.ilike.%${searchQuery}%`
+      );
+    }
 
     // Apply filter based on active tab
     if (activeTab === "active") {
@@ -71,7 +97,7 @@ export const ClientAccounts = () => {
     isLoading,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: ["clients", activeTab],
+    queryKey: ["clients", activeTab, searchQuery],
     queryFn: fetchClients,
     initialPageParam: 0,
     getNextPageParam: (lastPage, pages) => {
@@ -119,19 +145,18 @@ export const ClientAccounts = () => {
         </Button>
       </div>
 
-      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as TabType)} className="mb-3">
-        <TabsList>
-          <TabsTrigger value="all">
-            All ({counts?.all || 0})
-          </TabsTrigger>
-          <TabsTrigger value="active">
-            Active ({counts?.active || 0})
-          </TabsTrigger>
-          <TabsTrigger value="inactive">
-            Inactive ({counts?.inactive || 0})
-          </TabsTrigger>
-        </TabsList>
-      </Tabs>
+      <div className="flex items-center justify-between mb-3">
+        <ClientTabs
+          activeTab={activeTab}
+          onTabChange={(value) => setActiveTab(value as TabType)}
+          counts={counts || { all: 0, active: 0, inactive: 0 }}
+        />
+        <ClientSearch
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          onClear={() => setSearchQuery("")}
+        />
+      </div>
 
       <div className="border rounded-md">
         <ScrollArea className="h-[calc(100vh-220px)]" onScroll={handleScroll}>

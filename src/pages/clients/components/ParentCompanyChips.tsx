@@ -41,7 +41,7 @@ export const ParentCompanyChips = ({
         .from("parent_client_association")
         .select("parent_company_id")
         .eq("client_account_id", clientAccountId)
-        .maybeSingle();
+        .maybeSingle(); // Changed from .single() to .maybeSingle()
 
       if (error) {
         toast({

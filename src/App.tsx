@@ -5,7 +5,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import Index from "./pages/Index";
+import { Header } from "./components/layout/Header";
+import { ClientAccounts } from "./pages/clients/ClientAccounts";
 import Login from "./pages/Login";
 
 const queryClient = new QueryClient();
@@ -23,7 +24,14 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     return <div>Loading...</div>;
   }
 
-  return isAuthenticated ? <>{children}</> : <Navigate to="/login" />;
+  return isAuthenticated ? (
+    <>
+      <Header />
+      {children}
+    </>
+  ) : (
+    <Navigate to="/login" />
+  );
 };
 
 const App = () => (
@@ -38,7 +46,15 @@ const App = () => (
             path="/"
             element={
               <ProtectedRoute>
-                <Index />
+                <Navigate to="/clients" />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/clients"
+            element={
+              <ProtectedRoute>
+                <ClientAccounts />
               </ProtectedRoute>
             }
           />

@@ -5,7 +5,7 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { UseFormReturn } from "react-hook-form";
 import type { ClientFormValues } from "./client-form.schema";
-import { Upload } from "lucide-react";
+import { Upload, Link, Linkedin } from "lucide-react";
 import { ParentCompanySection } from "./components/ParentCompanySection";
 
 interface ClientFormFieldsProps {
@@ -33,78 +33,198 @@ export const ClientFormFields = ({
   };
 
   return (
-    <div className="space-y-4">
-      {/* Basic Information */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <FormField
-          control={form.control}
-          name="display_name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Display Name</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        {/* Logo Upload */}
-        <FormField
-          control={form.control}
-          name="logo_url"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Company Logo</FormLabel>
-              <FormControl>
-                <div className="flex items-center gap-2">
-                  <Input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleLogoChange}
-                    className="hidden"
-                    id="logo-upload"
-                  />
-                  <label
-                    htmlFor="logo-upload"
-                    className="flex items-center gap-2 px-4 py-2 border rounded-md cursor-pointer hover:bg-gray-50"
-                  >
-                    <Upload className="w-4 h-4" />
-                    Upload Logo
-                  </label>
-                  {field.value && (
-                    <img
-                      src={field.value}
-                      alt="Company logo"
-                      className="w-10 h-10 object-contain"
+    <div className="space-y-6">
+      {/* General Information Section */}
+      <div className="space-y-4">
+        <h3 className="text-lg font-medium">General Information</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="display_name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Display Name</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="client_code"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Client Code</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="location_type"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Location Type</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select location type" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="HEADQUARTERS">Headquarters</SelectItem>
+                    <SelectItem value="BRANCH">Branch</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="relationship_type"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Relationship Type</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select relationship type" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="PROSPECT">Prospect</SelectItem>
+                    <SelectItem value="CLIENT">Client</SelectItem>
+                    <SelectItem value="PARTNER">Partner</SelectItem>
+                    <SelectItem value="AFFILIATE">Affiliate</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="parent_client_account_id"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Parent Client</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value || ""}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select parent client" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {parentAccounts.map((account) => (
+                      <SelectItem key={account.value} value={account.value}>
+                        {account.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          {/* Logo Upload */}
+          <FormField
+            control={form.control}
+            name="logo_url"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Company Logo</FormLabel>
+                <FormControl>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleLogoChange}
+                      className="hidden"
+                      id="logo-upload"
                     />
-                  )}
-                </div>
+                    <label
+                      htmlFor="logo-upload"
+                      className="flex items-center gap-2 px-4 py-2 border rounded-md cursor-pointer hover:bg-gray-50"
+                    >
+                      <Upload className="w-4 h-4" />
+                      Upload Logo
+                    </label>
+                    {field.value && (
+                      <img
+                        src={field.value}
+                        alt="Company logo"
+                        className="w-10 h-10 object-contain"
+                      />
+                    )}
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+      </div>
+
+      {/* Company Status Section */}
+      <div className="space-y-4 border rounded-lg p-4">
+        <h3 className="text-lg font-medium">Company Status</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <FormField
+            control={form.control}
+            name="is_active"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                <FormLabel>Active Status</FormLabel>
+                <FormControl>
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="is_client"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                <FormLabel>Is Client</FormLabel>
+                <FormControl>
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+        </div>
+
+        {/* Parent Company Selection */}
+        <FormField
+          control={form.control}
+          name="parent_company_id"
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <ParentCompanySection
+                  selectedCompanyId={field.value}
+                  clientAccountId={client?.client_account_id}
+                  onSelect={(value) => field.onChange(value)}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
       </div>
-
-      {/* Parent Company Selection */}
-      <FormField
-        control={form.control}
-        name="parent_company_id"
-        render={({ field }) => (
-          <FormItem>
-            <FormControl>
-              <ParentCompanySection
-                selectedCompanyId={field.value}
-                clientAccountId={client?.client_account_id}
-                onSelect={(value) => field.onChange(value)}
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
 
       {/* Registration and Tax Information */}
       <div className="space-y-4 border rounded-lg p-4">
@@ -213,119 +333,47 @@ export const ClientFormFields = ({
         </div>
       </div>
 
-      {/* Client Information */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <FormField
-          control={form.control}
-          name="client_code"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Client Code</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="slug"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Slug</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
-
-      {/* Status and Type */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <FormField
-          control={form.control}
-          name="location_type"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Location Type</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+      {/* Contact Information Section */}
+      <div className="space-y-4 border rounded-lg p-4">
+        <h3 className="text-lg font-medium">Contact Information</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="website"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Website URL</FormLabel>
                 <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select location type" />
-                  </SelectTrigger>
+                  <div className="relative">
+                    <Input {...field} />
+                    <Link className="absolute right-3 top-2.5 h-5 w-5 text-gray-400" />
+                  </div>
                 </FormControl>
-                <SelectContent>
-                  <SelectItem value="HEADQUARTERS">Headquarters</SelectItem>
-                  <SelectItem value="BRANCH">Branch</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="relationship_type"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Relationship Type</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="linkedin"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>LinkedIn URL</FormLabel>
                 <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select relationship type" />
-                  </SelectTrigger>
+                  <div className="relative">
+                    <Input {...field} />
+                    <Linkedin className="absolute right-3 top-2.5 h-5 w-5 text-gray-400" />
+                  </div>
                 </FormControl>
-                <SelectContent>
-                  <SelectItem value="PROSPECT">Prospect</SelectItem>
-                  <SelectItem value="CLIENT">Client</SelectItem>
-                  <SelectItem value="PARTNER">Partner</SelectItem>
-                  <SelectItem value="AFFILIATE">Affiliate</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <FormField
-          control={form.control}
-          name="is_active"
-          render={({ field }) => (
-            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
-              <FormLabel>Active Status</FormLabel>
-              <FormControl>
-                <Switch
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="is_client"
-          render={({ field }) => (
-            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
-              <FormLabel>Is Client</FormLabel>
-              <FormControl>
-                <Switch
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                />
-              </FormControl>
-            </FormItem>
-          )}
-        />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
       </div>
 
       {/* Address Information */}
-      <div className="space-y-4">
+      <div className="space-y-4 border rounded-lg p-4">
         <h3 className="text-lg font-medium">Address Information</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
@@ -426,4 +474,3 @@ export const ClientFormFields = ({
     </div>
   );
 };
-

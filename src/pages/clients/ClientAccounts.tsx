@@ -42,6 +42,13 @@ export const ClientAccounts = () => {
     setIsDialogOpen(true);
   };
 
+  const formatLocation = (client: ClientAccount) => {
+    const parts = [client.city, client.state, client.country]
+      .filter(Boolean)
+      .join(", ");
+    return parts || "-";
+  };
+
   if (isLoading) {
     return <div>Loading...</div>;
   }
@@ -58,8 +65,9 @@ export const ClientAccounts = () => {
             <TableRow className="bg-muted/50">
               <TableHead className="py-2">Display Name</TableHead>
               <TableHead className="py-2">Client Code</TableHead>
-              <TableHead className="py-2 hidden md:table-cell">Location Type</TableHead>
-              <TableHead className="py-2 hidden sm:table-cell">Status</TableHead>
+              <TableHead className="py-2">Location</TableHead>
+              <TableHead className="py-2">Location Type</TableHead>
+              <TableHead className="py-2">Status</TableHead>
               <TableHead className="py-2 w-[100px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -68,8 +76,9 @@ export const ClientAccounts = () => {
               <TableRow key={client.client_account_id} className="hover:bg-muted/50">
                 <TableCell className="py-2">{client.display_name}</TableCell>
                 <TableCell className="py-2">{client.client_code}</TableCell>
-                <TableCell className="py-2 hidden md:table-cell">{client.location_type}</TableCell>
-                <TableCell className="py-2 hidden sm:table-cell">
+                <TableCell className="py-2">{formatLocation(client)}</TableCell>
+                <TableCell className="py-2">{client.location_type}</TableCell>
+                <TableCell className="py-2">
                   <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
                     client.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                   }`}>

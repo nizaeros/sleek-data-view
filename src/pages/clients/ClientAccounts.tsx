@@ -25,7 +25,6 @@ export const ClientAccounts = () => {
   const { data: counts } = useQuery({
     queryKey: ["client-counts", searchQuery],
     queryFn: async () => {
-      // Create a new query builder for each count
       const createBaseQuery = () => {
         let query = supabase.from("client_accounts").select("*", { count: "exact", head: true });
         if (searchQuery) {
@@ -34,16 +33,16 @@ export const ClientAccounts = () => {
         return query;
       };
 
-      const [totalResult, activeResult, inactiveResult] = await Promise.all([
+      const [{ count: totalCount }, { count: activeCount }, { count: inactiveCount }] = await Promise.all([
         createBaseQuery(),
         createBaseQuery().eq("is_active", true),
         createBaseQuery().eq("is_active", false)
       ]);
 
       return {
-        all: totalResult.count || 0,
-        active: activeResult.count || 0,
-        inactive: inactiveResult.count || 0,
+        all: totalCount || 0,
+        active: activeCount || 0,
+        inactive: inactiveCount || 0,
       };
     },
   });

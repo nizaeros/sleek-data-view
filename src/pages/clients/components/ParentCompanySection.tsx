@@ -116,7 +116,7 @@ export const ParentCompanySection = ({
 
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-medium">Parent Company Selection</h3>
+      <h3 className="text-lg font-medium">Duru Business Association</h3>
       <div className="space-y-2">
         {parentCompanies?.map((company) => {
           const isAssociated = currentAssociations.includes(company.parent_company_id);

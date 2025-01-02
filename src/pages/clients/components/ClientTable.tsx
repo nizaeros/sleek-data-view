@@ -8,21 +8,14 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Pencil, ArrowRightCircle, Circle, ChevronDown, ChevronRight } from "lucide-react";
-import type { Database } from "@/integrations/supabase/types";
+import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { ClientExpandedView } from "./ClientExpandedView";
-import { cn } from "@/lib/utils";
-
-type ClientAccount = Database["public"]["Tables"]["client_accounts"]["Row"] & {
-  industry: {
-    industry_name: string;
-  } | null;
-};
 
 interface ClientTableProps {
-  clients: ClientAccount[];
-  onEdit: (client: ClientAccount) => void;
-  formatLocation: (client: ClientAccount) => string;
+  clients: any[];
+  onEdit: (client: any) => void;
+  formatLocation: (client: any) => string;
   isFetchingNextPage: boolean;
 }
 
@@ -44,7 +37,7 @@ export const ClientTable = ({
         <TableHeader>
           <TableRow className="bg-muted/50">
             <TableHead className="w-8"></TableHead>
-            <TableHead className="w-[40%] py-1.5">Display Name</TableHead>
+            <TableHead className="w-[20%] py-1.5">Display Name</TableHead>
             <TableHead className="w-20 py-1.5">Actions</TableHead>
             <TableHead className="py-1.5">Client Code</TableHead>
             <TableHead className="py-1.5">Industry</TableHead>

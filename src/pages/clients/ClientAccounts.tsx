@@ -19,6 +19,7 @@ export const ClientAccounts = () => {
   const [activeTab, setActiveTab] = useState<TabType>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [selectedClient, setSelectedClient] = useState<any>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -113,12 +114,12 @@ export const ClientAccounts = () => {
 
   const handleEditClient = (client: any) => {
     console.log("Edit client:", client);
+    setSelectedClient(client);
     setIsDrawerOpen(true);
   };
 
   const handleDownload = async () => {
     try {
-      // Fetch all clients with related data
       const { data: allClients, error } = await supabase
         .from("client_accounts")
         .select(`
@@ -130,7 +131,6 @@ export const ClientAccounts = () => {
 
       if (error) throw error;
 
-      // Transform data for Excel
       const excelData = allClients.map(client => ({
         'Display Name': client.display_name,
         'Registered Name': client.registered_name,
@@ -149,14 +149,9 @@ export const ClientAccounts = () => {
         'Created At': new Date(client.created_at).toLocaleDateString(),
       }));
 
-      // Create workbook and worksheet
       const wb = XLSX.utils.book_new();
       const ws = XLSX.utils.json_to_sheet(excelData);
-
-      // Add worksheet to workbook
       XLSX.utils.book_append_sheet(wb, ws, 'Clients');
-
-      // Generate Excel file
       XLSX.writeFile(wb, 'client_accounts.xlsx');
 
       toast({
@@ -174,7 +169,6 @@ export const ClientAccounts = () => {
   };
 
   useEffect(() => {
-    // Invalidate queries to refresh the data
     queryClient.invalidateQueries({ queryKey: ['clients'] });
     queryClient.invalidateQueries({ queryKey: ['client-counts'] });
   }, [queryClient]);
@@ -223,6 +217,7 @@ export const ClientAccounts = () => {
       <NewClientDrawer
         open={isDrawerOpen}
         onOpenChange={setIsDrawerOpen}
+        selectedClient={selectedClient}
       />
     </div>
   );

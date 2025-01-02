@@ -20,9 +20,10 @@ import { ImageUpload } from "@/components/ui/image-upload";
 interface NewClientDrawerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  selectedClient?: any; // Add this prop
 }
 
-export function NewClientDrawer({ open, onOpenChange }: NewClientDrawerProps) {
+export function NewClientDrawer({ open, onOpenChange, selectedClient }: NewClientDrawerProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [sectionProgress, setSectionProgress] = useState({
@@ -35,25 +36,70 @@ export function NewClientDrawer({ open, onOpenChange }: NewClientDrawerProps) {
   const form = useForm<ClientFormValues>({
     resolver: zodResolver(clientFormSchema),
     defaultValues: {
-      display_name: "",
-      registered_name: "",
-      client_code: "",
-      location_type: "BRANCH",
-      is_client: true,
-      is_active: true,
-      address_line1: "",
-      address_line2: "",
-      city: "",
-      state: "",
-      country: "",
-      postal_code: "",
-      parent_client_account_id: "",
-      parent_company_id: "",
-      website: "",
-      linkedin: "",
-      registration_number: "",
+      display_name: selectedClient?.display_name || "",
+      registered_name: selectedClient?.registered_name || "",
+      client_code: selectedClient?.client_code || "",
+      location_type: selectedClient?.location_type || "BRANCH",
+      is_client: selectedClient?.is_client ?? true,
+      is_active: selectedClient?.is_active ?? true,
+      address_line1: selectedClient?.address_line1 || "",
+      address_line2: selectedClient?.address_line2 || "",
+      city: selectedClient?.city || "",
+      state: selectedClient?.state || "",
+      country: selectedClient?.country || "",
+      postal_code: selectedClient?.postal_code || "",
+      parent_client_account_id: selectedClient?.parent_client_account_id || "",
+      parent_company_id: selectedClient?.parent_company_id || "",
+      website: selectedClient?.website || "",
+      linkedin: selectedClient?.linkedin || "",
+      registration_number: selectedClient?.registration_number || "",
     },
   });
+
+  // Reset form when selectedClient changes
+  useEffect(() => {
+    if (selectedClient) {
+      form.reset({
+        display_name: selectedClient.display_name,
+        registered_name: selectedClient.registered_name,
+        client_code: selectedClient.client_code,
+        location_type: selectedClient.location_type,
+        is_client: selectedClient.is_client,
+        is_active: selectedClient.is_active,
+        address_line1: selectedClient.address_line1,
+        address_line2: selectedClient.address_line2,
+        city: selectedClient.city,
+        state: selectedClient.state,
+        country: selectedClient.country,
+        postal_code: selectedClient.postal_code,
+        parent_client_account_id: selectedClient.parent_client_account_id,
+        parent_company_id: selectedClient.parent_company_id,
+        website: selectedClient.website,
+        linkedin: selectedClient.linkedin,
+        registration_number: selectedClient.registration_number,
+      });
+    } else {
+      form.reset({
+        display_name: "",
+        registered_name: "",
+        client_code: "",
+        location_type: "BRANCH",
+        is_client: true,
+        is_active: true,
+        address_line1: "",
+        address_line2: "",
+        city: "",
+        state: "",
+        country: "",
+        postal_code: "",
+        parent_client_account_id: "",
+        parent_company_id: "",
+        website: "",
+        linkedin: "",
+        registration_number: "",
+      });
+    }
+  }, [selectedClient, form]);
 
   const formValues = form.watch();
   

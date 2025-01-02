@@ -1,12 +1,27 @@
-import { type ClientAccount } from "../client-form.schema";
-import { cn } from "@/lib/utils";
+interface ClientAccount {
+  display_name: string;
+  registered_name: string;
+  client_code: string;
+  is_active: boolean;
+  is_client: boolean;
+  location_type: string;
+  relationship_type?: string;
+  website?: string;
+  linkedin?: string;
+  registration_number?: string;
+  address_line1?: string;
+  address_line2?: string;
+  city?: string;
+  state?: string;
+  country?: string;
+  postal_code?: string;
+  industry?: { industry_name: string } | null;
+  entity_type?: { type_name: string } | null;
+  parent?: { display_name: string } | null;
+}
 
 interface ClientExpandedViewProps {
-  client: ClientAccount & {
-    industry?: { industry_name: string } | null;
-    entity_type?: { type_name: string } | null;
-    parent?: { display_name: string } | null;
-  };
+  client: ClientAccount;
 }
 
 export const ClientExpandedView = ({ client }: ClientExpandedViewProps) => {

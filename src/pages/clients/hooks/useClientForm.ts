@@ -27,7 +27,7 @@ export const useClientForm = (client: ClientAccount | null, onSuccess: () => voi
       country: client?.country || "",
       postal_code: client?.postal_code || "",
       parent_client_account_id: client?.parent_client_account_id || "",
-      parent_company_id: "",  // Will be set after fetching association
+      parent_company_id: "",
       website: client?.website || "",
       linkedin: client?.linkedin || "",
       registration_number: client?.registration_number || "",
@@ -37,7 +37,6 @@ export const useClientForm = (client: ClientAccount | null, onSuccess: () => voi
     },
   });
 
-  // Fetch and set parent company association when editing
   useEffect(() => {
     const fetchParentCompanyAssociation = async () => {
       if (client?.client_account_id) {

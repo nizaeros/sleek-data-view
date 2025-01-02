@@ -13,22 +13,33 @@ import { ClientTabs } from "./components/ClientTabs";
 type ClientAccount = Database["public"]["Tables"]["client_accounts"]["Row"];
 type TabType = "all" | "active" | "inactive";
 
-const ITEMS_PER_PAGE = 20; // Increased from 10 to reduce number of queries
+const ITEMS_PER_PAGE = 20;
 
 export const ClientAccounts = () => {
   const [selectedClient, setSelectedClient] = useState<ClientAccount | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
+
+  // Handle search with debouncing
+  const handleSearchChange = (value: string) => {
+    setDebouncedSearchQuery(value);
+  };
+
+  const handleClearSearch = () => {
+    setSearchQuery("");
+    setDebouncedSearchQuery("");
+  };
 
   // Fetch counts with proper stale time and caching
   const { data: counts, isLoading: isCountsLoading } = useQuery({
-    queryKey: ["client-counts", searchQuery],
+    queryKey: ["client-counts", debouncedSearchQuery],
     queryFn: async () => {
       const createBaseQuery = () => {
         let query = supabase.from("client_accounts").select("*", { count: "exact", head: true });
-        if (searchQuery) {
-          query = query.ilike("display_name", `%${searchQuery}%`);
+        if (debouncedSearchQuery) {
+          query = query.ilike("display_name", `%${debouncedSearchQuery}%`);
         }
         return query;
       };
@@ -45,7 +56,7 @@ export const ClientAccounts = () => {
         inactive: inactiveCount || 0,
       };
     },
-    staleTime: 30000, // Cache for 30 seconds
+    staleTime: 30000,
   });
 
   const fetchClients = async ({ pageParam = 0 }) => {
@@ -53,8 +64,8 @@ export const ClientAccounts = () => {
       .from("client_accounts")
       .select("*", { count: "exact" });
 
-    if (searchQuery) {
-      query = query.ilike("display_name", `%${searchQuery}%`);
+    if (debouncedSearchQuery) {
+      query = query.ilike("display_name", `%${debouncedSearchQuery}%`);
     }
 
     if (activeTab === "active") {
@@ -78,7 +89,7 @@ export const ClientAccounts = () => {
     isLoading,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: ["clients", activeTab, searchQuery],
+    queryKey: ["clients", activeTab, debouncedSearchQuery],
     queryFn: fetchClients,
     initialPageParam: 0,
     getNextPageParam: (lastPage, pages) => {
@@ -87,7 +98,7 @@ export const ClientAccounts = () => {
         ? pages.length
         : undefined;
     },
-    staleTime: 30000, // Cache for 30 seconds
+    staleTime: 30000,
   });
 
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
@@ -114,35 +125,13 @@ export const ClientAccounts = () => {
     return parts || "-";
   };
 
-  const handleSearchChange = (value: string) => {
-    setSearchQuery(value);
-  };
-
-  const handleClearSearch = () => {
-    setSearchQuery("");
-  };
-
-  // Show loading state while initial data is being fetched
-  if (isLoading || isCountsLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#1034A6] mx-auto"></div>
-          <p className="mt-2 text-gray-600">Loading client data...</p>
-        </div>
-      </div>
-    );
-  }
-
-  const allClients = data?.pages.flatMap(page => page.data || []) || [];
-
   return (
     <div className="px-4 sm:px-6 lg:px-6 py-3">
       <div className="flex items-center justify-between mb-3">
         <h1 className="text-base font-semibold text-[#1034A6]">Client Accounts</h1>
         <div className="flex items-center gap-4">
           <ClientSearch
-            searchQuery={searchQuery}
+            searchQuery={debouncedSearchQuery}
             onSearchChange={handleSearchChange}
             onClearSearch={handleClearSearch}
           />
@@ -161,7 +150,7 @@ export const ClientAccounts = () => {
       <div className="border rounded-md">
         <ScrollArea className="h-[calc(100vh-220px)]" onScroll={handleScroll}>
           <ClientTable
-            clients={allClients}
+            clients={data?.pages.flatMap(page => page.data || []) || []}
             onEdit={handleEdit}
             formatLocation={formatLocation}
             isFetchingNextPage={isFetchingNextPage}

@@ -10,7 +10,11 @@ import { Button } from "@/components/ui/button";
 import { Pencil, ArrowRightCircle, Circle } from "lucide-react";
 import type { Database } from "@/integrations/supabase/types";
 
-type ClientAccount = Database["public"]["Tables"]["client_accounts"]["Row"];
+type ClientAccount = Database["public"]["Tables"]["client_accounts"]["Row"] & {
+  industry: {
+    industry_name: string;
+  } | null;
+};
 
 interface ClientTableProps {
   clients: ClientAccount[];
@@ -53,7 +57,7 @@ export const ClientTable = ({
               </TableCell>
               <TableCell className="py-1.5">{client.client_code}</TableCell>
               <TableCell className="py-1.5">
-                {client.industry_id ? "Loading..." : "-"}
+                {client.industry?.industry_name || "-"}
               </TableCell>
               <TableCell className="py-1.5">{formatLocation(client)}</TableCell>
               <TableCell className="py-1.5">{client.location_type}</TableCell>

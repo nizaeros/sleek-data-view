@@ -17,7 +17,6 @@ interface ClientAccount {
   postal_code?: string;
   industry?: { industry_name: string } | null;
   entity_type?: { type_name: string } | null;
-  parent?: { display_name: string } | null;
 }
 
 interface ClientExpandedViewProps {
@@ -47,7 +46,6 @@ export const ClientExpandedView = ({ client }: ClientExpandedViewProps) => {
         <InfoItem label="Client Code" value={client.client_code} />
         <InfoItem label="Industry" value={client.industry?.industry_name} />
         <InfoItem label="Entity Type" value={client.entity_type?.type_name} />
-        <InfoItem label="Parent Client" value={client.parent?.display_name} />
       </InfoSection>
 
       <InfoSection title="Status Information">

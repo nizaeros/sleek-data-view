@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, Download } from "lucide-react";
+import { Download } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ClientSearch } from "./components/ClientSearch";
 import { ClientTable } from "./components/ClientTable";
@@ -53,8 +53,7 @@ export const ClientAccounts = () => {
       .select(`
         *,
         industry:industries(industry_name),
-        entity_type:entity_types(type_name),
-        parent:client_accounts!parent_client_account_id(display_name)
+        entity_type:entity_types(type_name)
       `);
 
     if (searchQuery) {
@@ -115,8 +114,7 @@ export const ClientAccounts = () => {
         .select(`
           *,
           industry:industries(industry_name),
-          entity_type:entity_types(type_name),
-          parent:client_accounts!parent_client_account_id(display_name)
+          entity_type:entity_types(type_name)
         `);
 
       if (error) throw error;
@@ -127,7 +125,6 @@ export const ClientAccounts = () => {
         'Client Code': client.client_code,
         'Industry': client.industry?.industry_name || '',
         'Entity Type': client.entity_type?.type_name || '',
-        'Parent Client': client.parent?.display_name || '',
         'Location Type': client.location_type,
         'Is Client': client.is_client ? 'Yes' : 'No',
         'Is Active': client.is_active ? 'Yes' : 'No',

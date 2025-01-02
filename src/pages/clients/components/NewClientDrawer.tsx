@@ -1,4 +1,3 @@
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { Form } from "@/components/ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -14,6 +13,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { clientFormSchema, type ClientFormValues } from "../client-form.schema";
 import { useQueryClient } from "@tanstack/react-query";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { ImageUpload } from "@/components/ui/image-upload";
 
 interface NewClientDrawerProps {
   open: boolean;
@@ -28,6 +30,7 @@ export function NewClientDrawer({ open, onOpenChange }: NewClientDrawerProps) {
     status: 0,
     address: 0
   });
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
 
   const form = useForm<ClientFormValues>({
     resolver: zodResolver(clientFormSchema),
@@ -46,6 +49,9 @@ export function NewClientDrawer({ open, onOpenChange }: NewClientDrawerProps) {
       postal_code: "",
       parent_client_account_id: "",
       parent_company_id: "",
+      website: "",
+      linkedin: "",
+      registration_number: "",
     },
   });
 
@@ -76,6 +82,32 @@ export function NewClientDrawer({ open, onOpenChange }: NewClientDrawerProps) {
     return (filledFields.length / fields.length) * 100;
   }
 
+  const handleLogoUpload = async (file: File) => {
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${crypto.randomUUID()}.${fileExt}`;
+      const { error: uploadError, data } = await supabase.storage
+        .from('company-logos')
+        .upload(fileName, file);
+
+      if (uploadError) throw uploadError;
+
+      if (data) {
+        const { data: { publicUrl } } = supabase.storage
+          .from('company-logos')
+          .getPublicUrl(data.path);
+        setLogoUrl(publicUrl);
+      }
+    } catch (error) {
+      console.error('Error uploading logo:', error);
+      toast({
+        title: "Error",
+        description: "Failed to upload logo",
+        variant: "destructive",
+      });
+    }
+  };
+
   const onSubmit = async (values: ClientFormValues) => {
     try {
       // Generate slug from display name
@@ -105,6 +137,7 @@ export function NewClientDrawer({ open, onOpenChange }: NewClientDrawerProps) {
           country: values.country || null,
           postal_code: values.postal_code || null,
           parent_client_account_id: values.parent_client_account_id || null,
+          logo_url: logoUrl,
         })
         .select()
         .single();
@@ -145,46 +178,54 @@ export function NewClientDrawer({ open, onOpenChange }: NewClientDrawerProps) {
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-[500px] sm:w-[540px] overflow-y-auto">
-        <SheetHeader className="px-4 py-2">
-          <SheetTitle>Add New Client</SheetTitle>
+      <SheetContent side="right" className="w-[800px] sm:w-[900px] overflow-y-auto">
+        <SheetHeader className="px-6 py-4 border-b">
+          <SheetTitle className="text-xl font-semibold text-[#1034A6]">Add New Client</SheetTitle>
         </SheetHeader>
-        <div className="px-4 overflow-y-auto h-[calc(100vh-140px)]">
+        <div className="px-6 py-4">
+          <div className="mb-6">
+            <Label className="text-sm font-medium mb-2 block">Company Logo</Label>
+            <ImageUpload
+              value={logoUrl}
+              onChange={handleLogoUpload}
+              className="w-32 h-32"
+            />
+          </div>
           <Form {...form}>
-            <form className="space-y-2">
-              <Accordion type="single" defaultValue="general" className="w-full space-y-2">
-                <AccordionItem value="general" className="border px-2 py-1">
-                  <AccordionTrigger className="hover:no-underline py-2">
+            <form className="space-y-4">
+              <Accordion type="single" defaultValue="general" className="w-full space-y-4">
+                <AccordionItem value="general" className="border rounded-lg overflow-hidden">
+                  <AccordionTrigger className="hover:no-underline py-3 px-4 bg-slate-50">
                     <div className="flex flex-col items-start">
-                      <span>General Information</span>
+                      <span className="text-[#1034A6] font-medium">General Information</span>
                       <Progress value={sectionProgress.general} className="w-[200px] h-1.5 mt-1" />
                     </div>
                   </AccordionTrigger>
-                  <AccordionContent className="pt-2">
+                  <AccordionContent className="p-4 bg-white">
                     <GeneralSection form={form} />
                   </AccordionContent>
                 </AccordionItem>
 
-                <AccordionItem value="status" className="border px-2 py-1">
-                  <AccordionTrigger className="hover:no-underline py-2">
+                <AccordionItem value="status" className="border rounded-lg overflow-hidden">
+                  <AccordionTrigger className="hover:no-underline py-3 px-4 bg-slate-50">
                     <div className="flex flex-col items-start">
-                      <span>Client Status</span>
+                      <span className="text-[#1034A6] font-medium">Client Status</span>
                       <Progress value={sectionProgress.status} className="w-[200px] h-1.5 mt-1" />
                     </div>
                   </AccordionTrigger>
-                  <AccordionContent className="pt-2">
+                  <AccordionContent className="p-4 bg-white">
                     <ClientStatusSection form={form} />
                   </AccordionContent>
                 </AccordionItem>
 
-                <AccordionItem value="address" className="border px-2 py-1">
-                  <AccordionTrigger className="hover:no-underline py-2">
+                <AccordionItem value="address" className="border rounded-lg overflow-hidden">
+                  <AccordionTrigger className="hover:no-underline py-3 px-4 bg-slate-50">
                     <div className="flex flex-col items-start">
-                      <span>Address Information</span>
+                      <span className="text-[#1034A6] font-medium">Address Information</span>
                       <Progress value={sectionProgress.address} className="w-[200px] h-1.5 mt-1" />
                     </div>
                   </AccordionTrigger>
-                  <AccordionContent className="pt-2">
+                  <AccordionContent className="p-4 bg-white">
                     <AddressSection form={form} />
                   </AccordionContent>
                 </AccordionItem>
@@ -192,8 +233,8 @@ export function NewClientDrawer({ open, onOpenChange }: NewClientDrawerProps) {
             </form>
           </Form>
         </div>
-        <div className="border-t p-4 mt-auto">
-          <div className="flex justify-end gap-2">
+        <div className="border-t p-6 mt-auto">
+          <div className="flex justify-end gap-3">
             <Button variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>

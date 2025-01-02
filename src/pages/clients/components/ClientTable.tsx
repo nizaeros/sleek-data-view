@@ -32,6 +32,7 @@ export const ClientTable = ({
           <TableRow className="bg-muted/50">
             <TableHead className="py-1.5">Display Name</TableHead>
             <TableHead className="py-1.5">Client Code</TableHead>
+            <TableHead className="py-1.5">Industry</TableHead>
             <TableHead className="py-1.5">Location</TableHead>
             <TableHead className="py-1.5">Location Type</TableHead>
             <TableHead className="py-1.5 w-[100px]">Actions</TableHead>
@@ -51,6 +52,9 @@ export const ClientTable = ({
                 </div>
               </TableCell>
               <TableCell className="py-1.5">{client.client_code}</TableCell>
+              <TableCell className="py-1.5">
+                {client.industry_id ? "Loading..." : "-"}
+              </TableCell>
               <TableCell className="py-1.5">{formatLocation(client)}</TableCell>
               <TableCell className="py-1.5">{client.location_type}</TableCell>
               <TableCell className="py-1.5">

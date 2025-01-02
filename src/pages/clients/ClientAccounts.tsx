@@ -66,7 +66,10 @@ export const ClientAccounts = () => {
     console.log("Fetching clients with search:", debouncedSearchQuery);
     let query = supabase
       .from("client_accounts")
-      .select("*", { count: "exact" });
+      .select(`
+        *,
+        industry:industries(industry_name)
+      `);
 
     if (debouncedSearchQuery) {
       query = query.ilike("display_name", `%${debouncedSearchQuery}%`);

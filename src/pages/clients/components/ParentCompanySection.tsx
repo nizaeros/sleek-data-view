@@ -41,11 +41,12 @@ export const ParentCompanySection = ({
       }
 
       console.log("Fetching association for client:", clientAccountId);
+      
       const { data, error } = await supabase
         .from("parent_client_association")
         .select("parent_company_id")
         .eq("client_account_id", clientAccountId)
-        .single();
+        .limit(1);
 
       if (error) {
         console.error("Error fetching association:", error);
@@ -57,9 +58,9 @@ export const ParentCompanySection = ({
         return;
       }
 
-      if (data) {
-        console.log("Found association:", data);
-        const associatedId = data.parent_company_id;
+      if (data && data.length > 0) {
+        console.log("Found association:", data[0]);
+        const associatedId = data[0].parent_company_id;
         setCurrentAssociations([associatedId]);
         // Set the initial selection if not already set
         if (!selectedCompanyId) {

@@ -42,30 +42,36 @@ export const ParentCompanySection = ({
 
       console.log("Fetching association for client:", clientAccountId);
       
-      const { data, error } = await supabase
-        .from("parent_client_association")
-        .select("parent_company_id")
-        .eq("client_account_id", clientAccountId)
-        .limit(1);
+      try {
+        const { data, error } = await supabase
+          .from("parent_client_association")
+          .select("parent_company_id")
+          .eq("client_account_id", clientAccountId)
+          .maybeSingle();
 
-      if (error) {
-        console.error("Error fetching association:", error);
-        toast({
-          title: "Error fetching association",
-          description: error.message,
-          variant: "destructive",
-        });
-        return;
-      }
-
-      if (data && data.length > 0) {
-        console.log("Found association:", data[0]);
-        const associatedId = data[0].parent_company_id;
-        setCurrentAssociations([associatedId]);
-        // Set the initial selection if not already set
-        if (!selectedCompanyId) {
-          onSelect(associatedId);
+        if (error) {
+          console.error("Error fetching association:", error);
+          toast({
+            title: "Error fetching association",
+            description: error.message,
+            variant: "destructive",
+          });
+          return;
         }
+
+        if (data) {
+          console.log("Found association:", data);
+          const associatedId = data.parent_company_id;
+          setCurrentAssociations([associatedId]);
+          // Set the initial selection if not already set
+          if (!selectedCompanyId) {
+            onSelect(associatedId);
+          }
+        } else {
+          console.log("No association found for client:", clientAccountId);
+        }
+      } catch (error) {
+        console.error("Error in fetchAssociation:", error);
       }
     };
 

@@ -105,7 +105,7 @@ export function NewClientDrawer({ open, onOpenChange }: NewClientDrawerProps) {
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="h-[95vh]">
+      <DrawerContent className="fixed right-0 h-full w-[500px] mt-0">
         <DrawerHeader>
           <DrawerTitle>Add New Client</DrawerTitle>
         </DrawerHeader>

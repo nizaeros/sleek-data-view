@@ -5,9 +5,10 @@ import { ParentCompanySection } from "../ParentCompanySection";
 
 interface ClientStatusSectionProps {
   form: UseFormReturn<any>;
+  clientId?: string;  // Add this prop
 }
 
-export function ClientStatusSection({ form }: ClientStatusSectionProps) {
+export function ClientStatusSection({ form, clientId }: ClientStatusSectionProps) {
   return (
     <div className="space-y-4">
       <FormField
@@ -18,6 +19,7 @@ export function ClientStatusSection({ form }: ClientStatusSectionProps) {
             <FormControl>
               <ParentCompanySection
                 selectedCompanyId={field.value}
+                clientAccountId={clientId}  // Pass the client ID here
                 onSelect={(value) => field.onChange(value)}
               />
             </FormControl>

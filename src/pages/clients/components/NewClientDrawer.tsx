@@ -263,7 +263,10 @@ export function NewClientDrawer({ open, onOpenChange, selectedClient }: NewClien
                     </div>
                   </AccordionTrigger>
                   <AccordionContent className="p-4 bg-white">
-                    <ClientStatusSection form={form} />
+                    <ClientStatusSection 
+                      form={form} 
+                      clientId={selectedClient?.client_account_id}  // Add this prop
+                    />
                   </AccordionContent>
                 </AccordionItem>
 

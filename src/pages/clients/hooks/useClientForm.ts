@@ -4,6 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { clientFormSchema, type ClientFormValues, type ClientAccount } from "../client-form.schema";
+import { useEffect } from "react";
 
 export const useClientForm = (client: ClientAccount | null, onSuccess: () => void) => {
   const { toast } = useToast();
@@ -26,7 +27,7 @@ export const useClientForm = (client: ClientAccount | null, onSuccess: () => voi
       country: client?.country || "",
       postal_code: client?.postal_code || "",
       parent_client_account_id: client?.parent_client_account_id || "",
-      parent_company_id: client?.parent_company_id || "",
+      parent_company_id: "",  // Will be set after fetching association
       website: client?.website || "",
       linkedin: client?.linkedin || "",
       registration_number: client?.registration_number || "",
@@ -35,6 +36,32 @@ export const useClientForm = (client: ClientAccount | null, onSuccess: () => voi
       icn: client?.icn || "",
     },
   });
+
+  // Fetch and set parent company association when editing
+  useEffect(() => {
+    const fetchParentCompanyAssociation = async () => {
+      if (client?.client_account_id) {
+        console.log("Fetching parent company association for client:", client.client_account_id);
+        const { data, error } = await supabase
+          .from("parent_client_association")
+          .select("parent_company_id")
+          .eq("client_account_id", client.client_account_id)
+          .single();
+
+        if (error) {
+          console.error("Error fetching parent company association:", error);
+          return;
+        }
+
+        if (data) {
+          console.log("Found parent company association:", data);
+          form.setValue("parent_company_id", data.parent_company_id);
+        }
+      }
+    };
+
+    fetchParentCompanyAssociation();
+  }, [client, form]);
 
   const mutation = useMutation({
     mutationFn: async (values: ClientFormValues) => {

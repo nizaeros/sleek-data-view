@@ -42,17 +42,26 @@ export const useClientForm = (client: ClientAccount | null, onSuccess: () => voi
         throw new Error("Parent company selection is required");
       }
 
+      // Generate slug from display name
+      const slug = values.display_name
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '');
+
+      // Generate client code if not provided
+      const clientCode = values.client_code || values.display_name.substring(0, 3).toUpperCase();
+
       console.log("Inserting/updating client account");
       const { data: savedClient, error: clientError } = client
         ? await supabase
             .from("client_accounts")
-            .update(clientData as ClientAccount)
+            .update({ ...clientData, slug, client_code: clientCode })
             .eq("client_account_id", client.client_account_id)
             .select()
             .single()
         : await supabase
             .from("client_accounts")
-            .insert(clientData as ClientAccount)
+            .insert({ ...clientData, slug, client_code: clientCode })
             .select()
             .single();
 

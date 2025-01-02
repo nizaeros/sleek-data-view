@@ -7,6 +7,7 @@ export const clientFormSchema = z.object({
   location_type: z.enum(["HEADQUARTERS", "BRANCH"]),
   is_client: z.boolean().default(true),
   is_active: z.boolean().default(true),
+  relationship_type: z.enum(["PROSPECT", "CLIENT", "PARTNER", "AFFILIATE"]).default("PROSPECT"),
   address_line1: z.string().optional(),
   address_line2: z.string().optional(),
   city: z.string().optional(),
@@ -24,6 +25,7 @@ export type ClientFormValues = z.infer<typeof clientFormSchema>;
 
 export type ClientAccount = ClientFormValues & {
   client_account_id: string;
+  slug: string;
   created_at?: string;
   updated_at?: string;
 };

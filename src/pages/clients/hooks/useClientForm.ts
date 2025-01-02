@@ -35,7 +35,7 @@ export const useClientForm = (client: ClientAccount | null, onSuccess: () => voi
 
   const generateUniqueSlug = async (displayName: string, currentSlug?: string): Promise<string> => {
     // Generate base slug
-    const baseSlug = displayName
+    let baseSlug = displayName
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/(^-|-$)/g, '');
@@ -45,19 +45,24 @@ export const useClientForm = (client: ClientAccount | null, onSuccess: () => voi
       return currentSlug;
     }
 
-    // Check if slug exists
-    const { data: existingClients } = await supabase
-      .from('client_accounts')
-      .select('slug')
-      .eq('slug', baseSlug);
+    // Add timestamp to make the slug unique
+    const timestamp = Date.now().toString(36);
+    baseSlug = `${baseSlug}-${timestamp}`;
 
-    if (!existingClients?.length) {
-      return baseSlug;
+    // Double check if the slug exists (just in case)
+    const { data: existingClients } = await supabase
+      .from("client_accounts")
+      .select("slug")
+      .eq("slug", baseSlug)
+      .single();
+
+    if (existingClients) {
+      // In the unlikely case of a collision, add a random string
+      const randomString = Math.random().toString(36).substring(2, 7);
+      baseSlug = `${baseSlug}-${randomString}`;
     }
 
-    // If slug exists, append timestamp
-    const timestamp = new Date().getTime();
-    return `${baseSlug}-${timestamp}`;
+    return baseSlug;
   };
 
   const mutation = useMutation({

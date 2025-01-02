@@ -42,9 +42,13 @@ export const useClientForm = (client: ClientAccount | null, onSuccess: () => voi
         throw new Error("Parent company selection is required");
       }
 
+      // Generate client code if not provided
+      const clientCode = values.client_code || values.display_name.substring(0, 3).toUpperCase();
+
       // Prepare data for insert/update
       const data = {
         ...clientData,
+        client_code: clientCode,
         display_name: values.display_name,
         registered_name: values.registered_name || values.display_name,
         location_type: values.location_type,

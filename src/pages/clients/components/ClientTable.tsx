@@ -7,7 +7,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Pencil, ArrowRightCircle } from "lucide-react";
+import { Pencil, ArrowRightCircle, Circle } from "lucide-react";
 import type { Database } from "@/integrations/supabase/types";
 
 type ClientAccount = Database["public"]["Tables"]["client_accounts"]["Row"];
@@ -34,24 +34,25 @@ export const ClientTable = ({
             <TableHead className="py-1.5">Client Code</TableHead>
             <TableHead className="py-1.5">Location</TableHead>
             <TableHead className="py-1.5">Location Type</TableHead>
-            <TableHead className="py-1.5">Status</TableHead>
             <TableHead className="py-1.5 w-[100px]">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {clients.map((client) => (
             <TableRow key={client.client_account_id} className="hover:bg-muted/50">
-              <TableCell className="py-1.5">{client.display_name}</TableCell>
+              <TableCell className="py-1.5">
+                <div className="flex items-center gap-2">
+                  <Circle 
+                    className={`h-2 w-2 ${
+                      client.is_active ? 'text-green-500 fill-green-500' : 'text-red-500 fill-red-500'
+                    }`}
+                  />
+                  {client.display_name}
+                </div>
+              </TableCell>
               <TableCell className="py-1.5">{client.client_code}</TableCell>
               <TableCell className="py-1.5">{formatLocation(client)}</TableCell>
               <TableCell className="py-1.5">{client.location_type}</TableCell>
-              <TableCell className="py-1.5">
-                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                  client.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                }`}>
-                  {client.is_active ? "Active" : "Inactive"}
-                </span>
-              </TableCell>
               <TableCell className="py-1.5">
                 <div className="flex items-center gap-1">
                   <Button 

@@ -15,7 +15,7 @@ export type Database = {
           address_line2: string | null
           city: string | null
           client_account_id: string
-          client_code: string
+          client_code: string | null
           contact_info: Json | null
           country: string | null
           created_at: string | null
@@ -46,7 +46,7 @@ export type Database = {
           address_line2?: string | null
           city?: string | null
           client_account_id?: string
-          client_code: string
+          client_code?: string | null
           contact_info?: Json | null
           country?: string | null
           created_at?: string | null
@@ -77,7 +77,7 @@ export type Database = {
           address_line2?: string | null
           city?: string | null
           client_account_id?: string
-          client_code?: string
+          client_code?: string | null
           contact_info?: Json | null
           country?: string | null
           created_at?: string | null
@@ -962,6 +962,12 @@ export type Database = {
     Functions: {
       generate_migration: {
         Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      generate_unique_client_code: {
+        Args: {
+          display_name: string
+        }
         Returns: string
       }
       generate_unique_slug: {

@@ -16,6 +16,7 @@ import { supabase } from "@/integrations/supabase/client";
 const formSchema = z.object({
   logo_url: z.string().optional().nullable(),
   display_name: z.string().min(1, "Display name is required"),
+  registered_name: z.string().min(1, "Registered name is required"),
   client_code: z.string().optional().nullable(),
   location_type: z.enum(["HEADQUARTERS", "BRANCH"]),
   has_parent: z.boolean().default(false),
@@ -29,8 +30,8 @@ const formSchema = z.object({
   state: z.string().optional().nullable(),
   country: z.string().optional().nullable(),
   postal_code: z.string().optional().nullable(),
-  website: z.string().url().optional().nullable(),
-  linkedin: z.string().url().optional().nullable(),
+  website: z.string().optional().nullable(),
+  linkedin: z.string().optional().nullable(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -53,6 +54,7 @@ export function NewClientDrawer({ open, onOpenChange }: NewClientDrawerProps) {
     defaultValues: {
       logo_url: null,
       display_name: "",
+      registered_name: "",
       client_code: null,
       location_type: "BRANCH",
       has_parent: false,
@@ -74,7 +76,7 @@ export function NewClientDrawer({ open, onOpenChange }: NewClientDrawerProps) {
   const formValues = form.watch();
   
   useEffect(() => {
-    const generalFields = ['display_name', 'client_code', 'location_type'];
+    const generalFields = ['display_name', 'registered_name', 'client_code', 'location_type'];
     const generalProgress = calculateSectionProgress(generalFields, formValues);
     
     const statusFields = ['parent_company_id'];
@@ -102,12 +104,20 @@ export function NewClientDrawer({ open, onOpenChange }: NewClientDrawerProps) {
     try {
       console.log("Form values:", values);
       
+      // Generate slug from display name
+      const slug = values.display_name
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '');
+      
       // Insert into client_accounts
       const { data: clientData, error: clientError } = await supabase
         .from('client_accounts')
         .insert({
           display_name: values.display_name,
+          registered_name: values.registered_name,
           client_code: values.client_code || values.display_name.substring(0, 3).toUpperCase(),
+          slug,
           location_type: values.location_type,
           is_client: true,
           is_active: values.is_active,

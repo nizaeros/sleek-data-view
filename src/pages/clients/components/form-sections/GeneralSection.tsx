@@ -42,12 +42,26 @@ export function GeneralSection({ form }: GeneralSectionProps) {
 
       <FormField
         control={form.control}
+        name="registered_name"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel className="text-xs">Registered Name</FormLabel>
+            <FormControl>
+              <Input {...field} className="h-8" />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
         name="client_code"
         render={({ field }) => (
           <FormItem>
             <FormLabel className="text-xs">Client Code</FormLabel>
             <FormControl>
-              <Input {...field} className="h-8" />
+              <Input {...field} className="h-8" placeholder="Auto-generated if left empty" />
             </FormControl>
             <FormMessage />
           </FormItem>

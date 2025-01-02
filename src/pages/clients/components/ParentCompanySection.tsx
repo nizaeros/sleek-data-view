@@ -32,22 +32,25 @@ export const ParentCompanySection = ({
     },
   });
 
-  // Fetch existing associations if editing
+  // Fetch existing association when editing
   useEffect(() => {
-    const fetchAssociations = async () => {
+    const fetchAssociation = async () => {
       if (!clientAccountId) {
         setCurrentAssociations([]);
         return;
       }
 
+      console.log("Fetching association for client:", clientAccountId);
       const { data, error } = await supabase
         .from("parent_client_association")
         .select("parent_company_id")
-        .eq("client_account_id", clientAccountId);
+        .eq("client_account_id", clientAccountId)
+        .single();
 
       if (error) {
+        console.error("Error fetching association:", error);
         toast({
-          title: "Error fetching associations",
+          title: "Error fetching association",
           description: error.message,
           variant: "destructive",
         });
@@ -55,33 +58,25 @@ export const ParentCompanySection = ({
       }
 
       if (data) {
-        const associatedIds = data.map(assoc => assoc.parent_company_id);
-        setCurrentAssociations(associatedIds);
-        // If there's at least one association and no selection, select the first one
-        if (associatedIds.length > 0 && !selectedCompanyId) {
-          onSelect(associatedIds[0]);
+        console.log("Found association:", data);
+        const associatedId = data.parent_company_id;
+        setCurrentAssociations([associatedId]);
+        // Set the initial selection if not already set
+        if (!selectedCompanyId) {
+          onSelect(associatedId);
         }
       }
     };
 
-    fetchAssociations();
-  }, [clientAccountId, toast]);
+    fetchAssociation();
+  }, [clientAccountId, selectedCompanyId, onSelect, toast]);
 
   const handleToggle = (companyId: string) => {
-    // For new clients, just update the selection state
-    if (!clientAccountId) {
-      onSelect(selectedCompanyId === companyId ? null : companyId);
-      return;
-    }
-
-    // For existing clients, update the database
     if (currentAssociations.includes(companyId)) {
       setCurrentAssociations(prev => prev.filter(id => id !== companyId));
-      if (selectedCompanyId === companyId) {
-        onSelect(null);
-      }
+      onSelect(null);
     } else {
-      setCurrentAssociations(prev => [...prev, companyId]);
+      setCurrentAssociations([companyId]); // Only allow one association
       onSelect(companyId);
     }
   };
@@ -91,9 +86,7 @@ export const ParentCompanySection = ({
       <h3 className="text-lg font-medium">Duru Business Association</h3>
       <div className="space-y-2">
         {parentCompanies?.map((company) => {
-          const isAssociated = clientAccountId 
-            ? currentAssociations.includes(company.parent_company_id)
-            : selectedCompanyId === company.parent_company_id;
+          const isAssociated = currentAssociations.includes(company.parent_company_id);
           
           return (
             <div 

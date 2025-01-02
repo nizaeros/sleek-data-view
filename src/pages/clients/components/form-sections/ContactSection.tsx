@@ -21,7 +21,7 @@ export const ContactSection = ({ form }: ContactSectionProps) => {
               <FormLabel>Website URL</FormLabel>
               <FormControl>
                 <div className="relative">
-                  <Input {...field} className="h-9 pl-9" />
+                  <Input {...field} value={field.value || ''} className="h-9 pl-9" />
                   <Link className="absolute left-2.5 top-2 h-5 w-5 text-gray-400" />
                 </div>
               </FormControl>
@@ -37,7 +37,7 @@ export const ContactSection = ({ form }: ContactSectionProps) => {
               <FormLabel>LinkedIn URL</FormLabel>
               <FormControl>
                 <div className="relative">
-                  <Input {...field} className="h-9 pl-9" />
+                  <Input {...field} value={field.value || ''} className="h-9 pl-9" />
                   <Linkedin className="absolute left-2.5 top-2 h-5 w-5 text-gray-400" />
                 </div>
               </FormControl>
@@ -53,7 +53,7 @@ export const ContactSection = ({ form }: ContactSectionProps) => {
               <FormLabel>Registration Number</FormLabel>
               <FormControl>
                 <div className="relative">
-                  <Input {...field} className="h-9 pl-9" />
+                  <Input {...field} value={field.value || ''} className="h-9 pl-9" />
                   <Building2 className="absolute left-2.5 top-2 h-5 w-5 text-gray-400" />
                 </div>
               </FormControl>

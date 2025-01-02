@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Plus, Download } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -20,6 +20,7 @@ export const ClientAccounts = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const { data: counts, isLoading: isCountsLoading } = useQuery({
     queryKey: ["client-counts", searchQuery],

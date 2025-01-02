@@ -51,13 +51,17 @@ export const useClientForm = (client: ClientAccount | null, onSuccess: () => voi
       // Generate client code if not provided
       const clientCode = values.client_code || values.display_name.substring(0, 3).toUpperCase();
 
-      // Prepare data for insert/update
+      // Prepare data for insert/update with all required fields
       const data = {
         ...clientData,
         slug,
         client_code: clientCode,
         display_name: values.display_name,
         registered_name: values.registered_name || values.display_name,
+        location_type: values.location_type,
+        is_client: values.is_client,
+        is_active: values.is_active,
+        relationship_type: values.relationship_type,
       };
 
       console.log("Inserting/updating client account");

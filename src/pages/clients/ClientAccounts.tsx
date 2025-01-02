@@ -1,13 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { useInfiniteQuery, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Plus, Download } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ClientSearch } from "./components/ClientSearch";
 import { ClientTable } from "./components/ClientTable";
 import { ClientTabs } from "./components/ClientTabs";
-import { NewClientDrawer } from "./components/NewClientDrawer";
 import * as XLSX from 'xlsx';
 import { useToast } from "@/components/ui/use-toast";
 
@@ -18,10 +17,7 @@ const ITEMS_PER_PAGE = 20;
 export const ClientAccounts = () => {
   const [activeTab, setActiveTab] = useState<TabType>("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [selectedClient, setSelectedClient] = useState<any>(null);
   const { toast } = useToast();
-  const queryClient = useQueryClient();
 
   const { data: counts, isLoading: isCountsLoading } = useQuery({
     queryKey: ["client-counts", searchQuery],
@@ -112,12 +108,6 @@ export const ClientAccounts = () => {
     return parts || "-";
   };
 
-  const handleEditClient = (client: any) => {
-    console.log("Edit client:", client);
-    setSelectedClient(client);
-    setIsDrawerOpen(true);
-  };
-
   const handleDownload = async () => {
     try {
       const { data: allClients, error } = await supabase
@@ -168,11 +158,6 @@ export const ClientAccounts = () => {
     }
   };
 
-  useEffect(() => {
-    queryClient.invalidateQueries({ queryKey: ['clients'] });
-    queryClient.invalidateQueries({ queryKey: ['client-counts'] });
-  }, [queryClient]);
-
   return (
     <div className="px-4 sm:px-6 lg:px-6 py-3">
       <div className="flex items-center justify-between mb-3">
@@ -191,9 +176,6 @@ export const ClientAccounts = () => {
             onSearchChange={setSearchQuery}
             onClearSearch={() => setSearchQuery("")}
           />
-          <Button onClick={() => setIsDrawerOpen(true)} size="icon" className="h-8 w-8">
-            <Plus className="h-4 w-4" />
-          </Button>
         </div>
       </div>
 
@@ -209,16 +191,9 @@ export const ClientAccounts = () => {
             clients={data?.pages.flatMap(page => page.data || []) || []}
             formatLocation={formatLocation}
             isFetchingNextPage={isFetchingNextPage}
-            onEdit={handleEditClient}
           />
         </ScrollArea>
       </div>
-
-      <NewClientDrawer
-        open={isDrawerOpen}
-        onOpenChange={setIsDrawerOpen}
-        selectedClient={selectedClient}
-      />
     </div>
   );
 };

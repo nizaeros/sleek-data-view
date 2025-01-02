@@ -51,17 +51,26 @@ export const useClientForm = (client: ClientAccount | null, onSuccess: () => voi
       // Generate client code if not provided
       const clientCode = values.client_code || values.display_name.substring(0, 3).toUpperCase();
 
+      // Prepare data for insert/update
+      const data = {
+        ...clientData,
+        slug,
+        client_code: clientCode,
+        display_name: values.display_name,
+        registered_name: values.registered_name || values.display_name,
+      };
+
       console.log("Inserting/updating client account");
       const { data: savedClient, error: clientError } = client
         ? await supabase
             .from("client_accounts")
-            .update({ ...clientData, slug, client_code: clientCode })
+            .update(data)
             .eq("client_account_id", client.client_account_id)
             .select()
             .single()
         : await supabase
             .from("client_accounts")
-            .insert({ ...clientData, slug, client_code: clientCode })
+            .insert(data)
             .select()
             .single();
 

@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { clientFormSchema, type ClientFormValues } from "../client-form.schema";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface NewClientDrawerProps {
   open: boolean;
@@ -20,6 +21,7 @@ interface NewClientDrawerProps {
 
 export function NewClientDrawer({ open, onOpenChange }: NewClientDrawerProps) {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [sectionProgress, setSectionProgress] = useState({
     general: 0,
     status: 0,
@@ -89,7 +91,7 @@ export function NewClientDrawer({ open, onOpenChange }: NewClientDrawerProps) {
         .from('client_accounts')
         .insert({
           display_name: values.display_name,
-          registered_name: values.registered_name,
+          registered_name: values.registered_name || values.display_name,
           client_code: clientCode,
           slug,
           location_type: values.location_type,
@@ -118,11 +120,17 @@ export function NewClientDrawer({ open, onOpenChange }: NewClientDrawerProps) {
 
       if (associationError) throw associationError;
 
+      // Invalidate queries to refresh the client list
+      queryClient.invalidateQueries({ queryKey: ['clients'] });
+      queryClient.invalidateQueries({ queryKey: ['client-counts'] });
+
       toast({
         title: "Success",
         description: "Client created successfully",
       });
 
+      // Reset form and close drawer
+      form.reset();
       onOpenChange(false);
     } catch (error) {
       console.error('Error creating client:', error);

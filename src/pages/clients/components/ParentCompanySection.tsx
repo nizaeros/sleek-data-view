@@ -32,7 +32,7 @@ export const ParentCompanySection = ({
     },
   });
 
-  // Fetch existing associations when editing
+  // Fetch existing associations
   useEffect(() => {
     const fetchAssociations = async () => {
       if (!clientAccountId) {
@@ -40,58 +40,84 @@ export const ParentCompanySection = ({
         return;
       }
 
-      console.log("Fetching associations for client:", clientAccountId);
-      
       try {
         const { data, error } = await supabase
           .from("parent_client_association")
           .select("parent_company_id")
           .eq("client_account_id", clientAccountId);
 
-        if (error) {
-          console.error("Error fetching associations:", error);
-          toast({
-            title: "Error fetching associations",
-            description: error.message,
-            variant: "destructive",
-          });
-          return;
-        }
+        if (error) throw error;
 
         if (data && data.length > 0) {
-          console.log("Found associations:", data);
           const associatedIds = data.map(assoc => assoc.parent_company_id);
           setCurrentAssociations(associatedIds);
-          // Set the initial selection if not already set
           if (!selectedCompanyId && associatedIds.length > 0) {
             onSelect(associatedIds[0]);
           }
         } else {
-          console.log("No associations found for client:", clientAccountId);
           setCurrentAssociations([]);
         }
       } catch (error) {
-        console.error("Error in fetchAssociations:", error);
+        console.error("Error fetching associations:", error);
+        toast({
+          title: "Error",
+          description: "Failed to fetch company associations",
+          variant: "destructive",
+        });
       }
     };
 
     fetchAssociations();
   }, [clientAccountId, selectedCompanyId, onSelect, toast]);
 
-  const handleToggle = (companyId: string) => {
-    if (currentAssociations.includes(companyId)) {
-      setCurrentAssociations(prev => prev.filter(id => id !== companyId));
-      onSelect(null);
-    } else {
-      // Allow multiple associations
-      setCurrentAssociations(prev => [...prev, companyId]);
-      onSelect(companyId);
+  const handleToggle = async (companyId: string) => {
+    try {
+      if (currentAssociations.includes(companyId)) {
+        // Remove association
+        const { error } = await supabase
+          .from("parent_client_association")
+          .delete()
+          .eq("client_account_id", clientAccountId)
+          .eq("parent_company_id", companyId);
+
+        if (error) throw error;
+
+        setCurrentAssociations(prev => prev.filter(id => id !== companyId));
+        onSelect(null);
+      } else {
+        // Add association
+        const { error } = await supabase
+          .from("parent_client_association")
+          .insert({
+            client_account_id: clientAccountId,
+            parent_company_id: companyId,
+          });
+
+        if (error) throw error;
+
+        setCurrentAssociations(prev => [...prev, companyId]);
+        onSelect(companyId);
+      }
+
+      toast({
+        title: "Success",
+        description: currentAssociations.includes(companyId) 
+          ? "Company association removed" 
+          : "Company associated successfully",
+      });
+    } catch (error) {
+      console.error("Error toggling association:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update company association",
+        variant: "destructive",
+      });
     }
   };
 
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-medium">Duru Business Association</h3>
+      <h3 className="text-lg font-medium">Parent Company Association</h3>
       <div className="space-y-2">
         {parentCompanies?.map((company) => {
           const isAssociated = currentAssociations.includes(company.parent_company_id);

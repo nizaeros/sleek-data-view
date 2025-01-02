@@ -44,7 +44,8 @@ export const ClientTable = ({
         <TableHeader>
           <TableRow className="bg-muted/50">
             <TableHead className="w-8"></TableHead>
-            <TableHead className="py-1.5">Display Name</TableHead>
+            <TableHead className="w-[40%] py-1.5">Display Name</TableHead>
+            <TableHead className="w-20 py-1.5">Actions</TableHead>
             <TableHead className="py-1.5">Client Code</TableHead>
             <TableHead className="py-1.5">Industry</TableHead>
             <TableHead className="py-1.5">Location</TableHead>
@@ -77,30 +78,32 @@ export const ClientTable = ({
                       }`}
                     />
                     {client.display_name}
-                    <div className="flex items-center gap-1 ml-2 opacity-30 hover:opacity-100 transition-opacity">
-                      <Button 
-                        variant="ghost" 
-                        size="icon"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onEdit(client);
-                        }}
-                        className="h-7 w-7 text-gray-500 hover:text-[#1034A6] transition-colors"
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="icon"
-                        className="h-7 w-7 text-gray-500 hover:text-[#1034A6] transition-colors"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          console.log('Navigate to dashboard', client.client_account_id);
-                        }}
-                      >
-                        <ArrowRightCircle className="h-4 w-4" />
-                      </Button>
-                    </div>
+                  </div>
+                </TableCell>
+                <TableCell className="py-1.5">
+                  <div className="flex items-center gap-1 opacity-30 hover:opacity-100 transition-opacity">
+                    <Button 
+                      variant="ghost" 
+                      size="icon"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onEdit(client);
+                      }}
+                      className="h-7 w-7 text-gray-500 hover:text-[#1034A6] transition-colors"
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="icon"
+                      className="h-7 w-7 text-gray-500 hover:text-[#1034A6] transition-colors"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        console.log('Navigate to dashboard', client.client_account_id);
+                      }}
+                    >
+                      <ArrowRightCircle className="h-4 w-4" />
+                    </Button>
                   </div>
                 </TableCell>
                 <TableCell className="py-1.5">{client.client_code}</TableCell>
@@ -112,7 +115,7 @@ export const ClientTable = ({
               </TableRow>
               {expandedRowId === client.client_account_id && (
                 <tr>
-                  <td colSpan={6} className="p-0">
+                  <td colSpan={7} className="p-0">
                     <ClientExpandedView client={client} />
                   </td>
                 </tr>

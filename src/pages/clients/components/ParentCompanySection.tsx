@@ -32,50 +32,50 @@ export const ParentCompanySection = ({
     },
   });
 
-  // Fetch existing association when editing
+  // Fetch existing associations when editing
   useEffect(() => {
-    const fetchAssociation = async () => {
+    const fetchAssociations = async () => {
       if (!clientAccountId) {
         setCurrentAssociations([]);
         return;
       }
 
-      console.log("Fetching association for client:", clientAccountId);
+      console.log("Fetching associations for client:", clientAccountId);
       
       try {
         const { data, error } = await supabase
           .from("parent_client_association")
           .select("parent_company_id")
-          .eq("client_account_id", clientAccountId)
-          .maybeSingle();
+          .eq("client_account_id", clientAccountId);
 
         if (error) {
-          console.error("Error fetching association:", error);
+          console.error("Error fetching associations:", error);
           toast({
-            title: "Error fetching association",
+            title: "Error fetching associations",
             description: error.message,
             variant: "destructive",
           });
           return;
         }
 
-        if (data) {
-          console.log("Found association:", data);
-          const associatedId = data.parent_company_id;
-          setCurrentAssociations([associatedId]);
+        if (data && data.length > 0) {
+          console.log("Found associations:", data);
+          const associatedIds = data.map(assoc => assoc.parent_company_id);
+          setCurrentAssociations(associatedIds);
           // Set the initial selection if not already set
-          if (!selectedCompanyId) {
-            onSelect(associatedId);
+          if (!selectedCompanyId && associatedIds.length > 0) {
+            onSelect(associatedIds[0]);
           }
         } else {
-          console.log("No association found for client:", clientAccountId);
+          console.log("No associations found for client:", clientAccountId);
+          setCurrentAssociations([]);
         }
       } catch (error) {
-        console.error("Error in fetchAssociation:", error);
+        console.error("Error in fetchAssociations:", error);
       }
     };
 
-    fetchAssociation();
+    fetchAssociations();
   }, [clientAccountId, selectedCompanyId, onSelect, toast]);
 
   const handleToggle = (companyId: string) => {
@@ -83,7 +83,8 @@ export const ParentCompanySection = ({
       setCurrentAssociations(prev => prev.filter(id => id !== companyId));
       onSelect(null);
     } else {
-      setCurrentAssociations([companyId]); // Only allow one association
+      // Allow multiple associations
+      setCurrentAssociations(prev => [...prev, companyId]);
       onSelect(companyId);
     }
   };

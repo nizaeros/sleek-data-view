@@ -11,6 +11,7 @@ import { Pencil, ArrowRightCircle, Circle, ChevronDown, ChevronRight } from "luc
 import type { Database } from "@/integrations/supabase/types";
 import { useState } from "react";
 import { ClientExpandedView } from "./ClientExpandedView";
+import { cn } from "@/lib/utils";
 
 type ClientAccount = Database["public"]["Tables"]["client_accounts"]["Row"] & {
   industry: {

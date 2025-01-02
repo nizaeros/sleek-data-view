@@ -49,7 +49,6 @@ export const ClientTable = ({
             <TableHead className="py-1.5">Industry</TableHead>
             <TableHead className="py-1.5">Location</TableHead>
             <TableHead className="py-1.5">Location Type</TableHead>
-            <TableHead className="py-1.5 w-[100px]">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -78,6 +77,30 @@ export const ClientTable = ({
                       }`}
                     />
                     {client.display_name}
+                    <div className="flex items-center gap-1 ml-2">
+                      <Button 
+                        variant="ghost" 
+                        size="icon"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onEdit(client);
+                        }}
+                        className="h-7 w-7 text-gray-400 hover:text-[#1034A6] transition-colors"
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="icon"
+                        className="h-7 w-7 text-gray-400 hover:text-[#1034A6] transition-colors"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          console.log('Navigate to dashboard', client.client_account_id);
+                        }}
+                      >
+                        <ArrowRightCircle className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                 </TableCell>
                 <TableCell className="py-1.5">{client.client_code}</TableCell>
@@ -86,36 +109,10 @@ export const ClientTable = ({
                 </TableCell>
                 <TableCell className="py-1.5">{formatLocation(client)}</TableCell>
                 <TableCell className="py-1.5">{client.location_type}</TableCell>
-                <TableCell className="py-1.5">
-                  <div className="flex items-center gap-1">
-                    <Button 
-                      variant="ghost" 
-                      size="icon"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onEdit(client);
-                      }}
-                      className="h-7 w-7 text-gray-400 hover:text-[#1034A6] transition-colors"
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="icon"
-                      className="h-7 w-7 text-gray-400 hover:text-[#1034A6] transition-colors"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        console.log('Navigate to dashboard', client.client_account_id);
-                      }}
-                    >
-                      <ArrowRightCircle className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </TableCell>
               </TableRow>
               {expandedRowId === client.client_account_id && (
                 <tr>
-                  <td colSpan={7} className="p-0">
+                  <td colSpan={6} className="p-0">
                     <ClientExpandedView client={client} />
                   </td>
                 </tr>

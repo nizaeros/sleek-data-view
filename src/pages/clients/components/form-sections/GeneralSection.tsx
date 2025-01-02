@@ -25,15 +25,15 @@ export function GeneralSection({ form }: GeneralSectionProps) {
   });
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       <FormField
         control={form.control}
         name="display_name"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Display Name</FormLabel>
+            <FormLabel className="text-xs">Display Name</FormLabel>
             <FormControl>
-              <Input {...field} />
+              <Input {...field} className="h-8" />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -45,9 +45,9 @@ export function GeneralSection({ form }: GeneralSectionProps) {
         name="client_code"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Client Code</FormLabel>
+            <FormLabel className="text-xs">Client Code</FormLabel>
             <FormControl>
-              <Input {...field} />
+              <Input {...field} className="h-8" />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -59,10 +59,10 @@ export function GeneralSection({ form }: GeneralSectionProps) {
         name="location_type"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Location Type</FormLabel>
+            <FormLabel className="text-xs">Location Type</FormLabel>
             <Select onValueChange={field.onChange} value={field.value}>
               <FormControl>
-                <SelectTrigger>
+                <SelectTrigger className="h-8">
                   <SelectValue placeholder="Select location type" />
                 </SelectTrigger>
               </FormControl>
@@ -80,8 +80,8 @@ export function GeneralSection({ form }: GeneralSectionProps) {
         control={form.control}
         name="has_parent"
         render={({ field }) => (
-          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
-            <FormLabel className="font-normal">Has Parent Client</FormLabel>
+          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-2">
+            <FormLabel className="text-xs">Has Parent Client</FormLabel>
             <FormControl>
               <Switch
                 checked={field.value}
@@ -98,10 +98,10 @@ export function GeneralSection({ form }: GeneralSectionProps) {
           name="parent_client_account_id"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Parent Client</FormLabel>
+              <FormLabel className="text-xs">Parent Client</FormLabel>
               <Select onValueChange={field.onChange} value={field.value || ""}>
                 <FormControl>
-                  <SelectTrigger>
+                  <SelectTrigger className="h-8">
                     <SelectValue placeholder="Select parent client" />
                   </SelectTrigger>
                 </FormControl>

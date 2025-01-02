@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import { GeneralSection } from "./form-sections/GeneralSection";
 import { ClientStatusSection } from "./form-sections/ClientStatusSection";
 import { AddressSection } from "./form-sections/AddressSection";
+import { Button } from "@/components/ui/button";
 
 const formSchema = z.object({
   // General Section
@@ -105,52 +106,62 @@ export function NewClientDrawer({ open, onOpenChange }: NewClientDrawerProps) {
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="fixed right-0 h-full w-[500px] mt-0">
-        <DrawerHeader>
+      <DrawerContent className="fixed right-0 h-full w-[500px] mt-0 border-l">
+        <DrawerHeader className="px-4 py-2">
           <DrawerTitle>Add New Client</DrawerTitle>
         </DrawerHeader>
-        <div className="px-4 overflow-y-auto">
+        <div className="px-4 overflow-y-auto h-[calc(100vh-140px)]">
           <Form {...form}>
-            <form className="space-y-4 pb-10">
-              <Accordion type="single" collapsible className="w-full">
-                <AccordionItem value="general">
-                  <AccordionTrigger className="hover:no-underline">
+            <form className="space-y-2">
+              <Accordion type="single" defaultValue={["general", "status", "address"]} className="w-full space-y-2">
+                <AccordionItem value="general" className="border px-2 py-1">
+                  <AccordionTrigger className="hover:no-underline py-2">
                     <div className="flex flex-col items-start">
                       <span>General Information</span>
-                      <Progress value={sectionProgress.general} className="w-[200px] h-2 mt-2" />
+                      <Progress value={sectionProgress.general} className="w-[200px] h-1.5 mt-1" />
                     </div>
                   </AccordionTrigger>
-                  <AccordionContent>
+                  <AccordionContent className="pt-2">
                     <GeneralSection form={form} />
                   </AccordionContent>
                 </AccordionItem>
 
-                <AccordionItem value="status">
-                  <AccordionTrigger className="hover:no-underline">
+                <AccordionItem value="status" className="border px-2 py-1">
+                  <AccordionTrigger className="hover:no-underline py-2">
                     <div className="flex flex-col items-start">
                       <span>Client Status</span>
-                      <Progress value={sectionProgress.status} className="w-[200px] h-2 mt-2" />
+                      <Progress value={sectionProgress.status} className="w-[200px] h-1.5 mt-1" />
                     </div>
                   </AccordionTrigger>
-                  <AccordionContent>
+                  <AccordionContent className="pt-2">
                     <ClientStatusSection form={form} />
                   </AccordionContent>
                 </AccordionItem>
 
-                <AccordionItem value="address">
-                  <AccordionTrigger className="hover:no-underline">
+                <AccordionItem value="address" className="border px-2 py-1">
+                  <AccordionTrigger className="hover:no-underline py-2">
                     <div className="flex flex-col items-start">
                       <span>Address Information</span>
-                      <Progress value={sectionProgress.address} className="w-[200px] h-2 mt-2" />
+                      <Progress value={sectionProgress.address} className="w-[200px] h-1.5 mt-1" />
                     </div>
                   </AccordionTrigger>
-                  <AccordionContent>
+                  <AccordionContent className="pt-2">
                     <AddressSection form={form} />
                   </AccordionContent>
                 </AccordionItem>
               </Accordion>
             </form>
           </Form>
+        </div>
+        <div className="border-t p-4 mt-auto">
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
+            <Button onClick={form.handleSubmit((data) => console.log(data))}>
+              Save Client
+            </Button>
+          </div>
         </div>
       </DrawerContent>
     </Drawer>

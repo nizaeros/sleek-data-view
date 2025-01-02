@@ -2,7 +2,6 @@ import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/u
 import { Form } from "@/components/ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import * as z from "zod";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Progress } from "@/components/ui/progress";
 import { useEffect, useState } from "react";
@@ -12,29 +11,7 @@ import { AddressSection } from "./form-sections/AddressSection";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-
-const formSchema = z.object({
-  logo_url: z.string().optional().nullable(),
-  display_name: z.string().min(1, "Display name is required"),
-  registered_name: z.string().min(1, "Registered name is required"),
-  client_code: z.string().optional().nullable(),
-  location_type: z.enum(["HEADQUARTERS", "BRANCH"]),
-  has_parent: z.boolean().default(false),
-  parent_client_account_id: z.string().optional().nullable(),
-  parent_company_id: z.string().min(1, "Parent company selection is required"),
-  is_active: z.boolean().default(true),
-  is_client: z.boolean().default(true),
-  address_line1: z.string().optional().nullable(),
-  address_line2: z.string().optional().nullable(),
-  city: z.string().optional().nullable(),
-  state: z.string().optional().nullable(),
-  country: z.string().optional().nullable(),
-  postal_code: z.string().optional().nullable(),
-  website: z.string().optional().nullable(),
-  linkedin: z.string().optional().nullable(),
-});
-
-type FormValues = z.infer<typeof formSchema>;
+import { clientFormSchema, type ClientFormValues } from "../client-form.schema";
 
 interface NewClientDrawerProps {
   open: boolean;
@@ -49,27 +26,23 @@ export function NewClientDrawer({ open, onOpenChange }: NewClientDrawerProps) {
     address: 0
   });
 
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<ClientFormValues>({
+    resolver: zodResolver(clientFormSchema),
     defaultValues: {
-      logo_url: null,
       display_name: "",
       registered_name: "",
-      client_code: null,
+      client_code: "",
       location_type: "BRANCH",
-      has_parent: false,
-      parent_client_account_id: null,
-      parent_company_id: "",
-      is_active: true,
       is_client: true,
-      address_line1: null,
-      address_line2: null,
-      city: null,
-      state: null,
-      country: null,
-      postal_code: null,
-      website: null,
-      linkedin: null,
+      is_active: true,
+      address_line1: "",
+      address_line2: "",
+      city: "",
+      state: "",
+      country: "",
+      postal_code: "",
+      parent_client_account_id: "",
+      parent_company_id: "",
     },
   });
 
@@ -100,15 +73,16 @@ export function NewClientDrawer({ open, onOpenChange }: NewClientDrawerProps) {
     return (filledFields.length / fields.length) * 100;
   }
 
-  const onSubmit = async (values: FormValues) => {
+  const onSubmit = async (values: ClientFormValues) => {
     try {
-      console.log("Form values:", values);
-      
       // Generate slug from display name
       const slug = values.display_name
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/(^-|-$)/g, '');
+      
+      // Generate client code if not provided
+      const clientCode = values.client_code || values.display_name.substring(0, 3).toUpperCase();
       
       // Insert into client_accounts
       const { data: clientData, error: clientError } = await supabase
@@ -116,18 +90,18 @@ export function NewClientDrawer({ open, onOpenChange }: NewClientDrawerProps) {
         .insert({
           display_name: values.display_name,
           registered_name: values.registered_name,
-          client_code: values.client_code || values.display_name.substring(0, 3).toUpperCase(),
+          client_code: clientCode,
           slug,
           location_type: values.location_type,
           is_client: true,
           is_active: values.is_active,
-          address_line1: values.address_line1,
-          address_line2: values.address_line2,
-          city: values.city,
-          state: values.state,
-          country: values.country,
-          postal_code: values.postal_code,
-          parent_client_account_id: values.parent_client_account_id,
+          address_line1: values.address_line1 || null,
+          address_line2: values.address_line2 || null,
+          city: values.city || null,
+          state: values.state || null,
+          country: values.country || null,
+          postal_code: values.postal_code || null,
+          parent_client_account_id: values.parent_client_account_id || null,
         })
         .select()
         .single();

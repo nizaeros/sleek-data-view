@@ -33,6 +33,28 @@ export const useClientForm = (client: ClientAccount | null, onSuccess: () => voi
     },
   });
 
+  const generateUniqueSlug = async (displayName: string): Promise<string> => {
+    // Generate base slug
+    const baseSlug = displayName
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '');
+
+    // Check if slug exists
+    const { data: existingClients } = await supabase
+      .from('client_accounts')
+      .select('slug')
+      .eq('slug', baseSlug);
+
+    if (!existingClients?.length) {
+      return baseSlug;
+    }
+
+    // If slug exists, append timestamp
+    const timestamp = new Date().getTime();
+    return `${baseSlug}-${timestamp}`;
+  };
+
   const mutation = useMutation({
     mutationFn: async (values: ClientFormValues) => {
       console.log("Starting mutation with values:", values);
@@ -42,11 +64,8 @@ export const useClientForm = (client: ClientAccount | null, onSuccess: () => voi
         throw new Error("Parent company selection is required");
       }
 
-      // Generate slug from display name
-      const slug = values.display_name
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/(^-|-$)/g, '');
+      // Generate unique slug
+      const slug = await generateUniqueSlug(values.display_name);
 
       // Generate client code if not provided
       const clientCode = values.client_code || values.display_name.substring(0, 3).toUpperCase();

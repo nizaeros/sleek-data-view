@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Plus } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -105,6 +105,12 @@ export const ClientAccounts = () => {
     return parts || "-";
   };
 
+  const handleEditClient = (client: any) => {
+    console.log("Edit client:", client);
+    setIsDrawerOpen(true);
+    // Add edit logic here
+  };
+
   return (
     <div className="px-4 sm:px-6 lg:px-6 py-3">
       <div className="flex items-center justify-between mb-3">
@@ -133,6 +139,7 @@ export const ClientAccounts = () => {
             clients={data?.pages.flatMap(page => page.data || []) || []}
             formatLocation={formatLocation}
             isFetchingNextPage={isFetchingNextPage}
+            onEdit={handleEditClient}
           />
         </ScrollArea>
       </div>

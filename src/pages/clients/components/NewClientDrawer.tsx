@@ -178,7 +178,10 @@ export function NewClientDrawer({ open, onOpenChange }: NewClientDrawerProps) {
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-[800px] sm:w-[900px] overflow-y-auto">
+      <SheetContent 
+        side="right" 
+        className="w-[800px] sm:w-[900px] overflow-y-auto"
+      >
         <SheetHeader className="px-6 py-4 border-b">
           <SheetTitle className="text-xl font-semibold text-[#1034A6]">Add New Client</SheetTitle>
         </SheetHeader>

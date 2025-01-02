@@ -70,6 +70,24 @@ export const useClientForm = (client: ClientAccount | null, onSuccess: () => voi
           throw clientError;
         }
         savedClient = data;
+
+        // Update parent client association
+        const { error: associationError } = await supabase
+          .from("parent_client_association")
+          .upsert(
+            {
+              client_account_id: client.client_account_id,
+              parent_company_id: parent_company_id,
+            },
+            {
+              onConflict: "client_account_id",
+            }
+          );
+
+        if (associationError) {
+          console.error("Error updating association:", associationError);
+          throw associationError;
+        }
       } else {
         // Create new client
         console.log("Creating new client");
@@ -92,26 +110,19 @@ export const useClientForm = (client: ClientAccount | null, onSuccess: () => voi
           throw clientError;
         }
         savedClient = data;
-      }
 
-      console.log("Saved client:", savedClient);
-
-      // Update parent client association
-      const { error: associationError } = await supabase
-        .from("parent_client_association")
-        .upsert(
-          {
+        // Create parent client association
+        const { error: associationError } = await supabase
+          .from("parent_client_association")
+          .insert({
             client_account_id: savedClient.client_account_id,
             parent_company_id: parent_company_id,
-          },
-          {
-            onConflict: "client_account_id",
-          }
-        );
+          });
 
-      if (associationError) {
-        console.error("Error saving association:", associationError);
-        throw associationError;
+        if (associationError) {
+          console.error("Error creating association:", associationError);
+          throw associationError;
+        }
       }
 
       return savedClient;

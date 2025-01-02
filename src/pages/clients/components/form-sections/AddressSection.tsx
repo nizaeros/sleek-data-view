@@ -1,43 +1,44 @@
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { UseFormReturn } from "react-hook-form";
-import type { ClientFormValues } from "../../client-form.schema";
+import { Link, Linkedin } from "lucide-react";
 
 interface AddressSectionProps {
-  form: UseFormReturn<ClientFormValues>;
+  form: UseFormReturn<any>;
 }
 
-export const AddressSection = ({ form }: AddressSectionProps) => {
+export function AddressSection({ form }: AddressSectionProps) {
   return (
-    <div className="space-y-3 p-4 border rounded-lg bg-white">
-      <h3 className="text-lg font-medium border-b pb-2">Address Information</h3>
+    <div className="space-y-4">
+      <FormField
+        control={form.control}
+        name="address_line1"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Address Line 1</FormLabel>
+            <FormControl>
+              <Input {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="address_line2"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Address Line 2</FormLabel>
+            <FormControl>
+              <Input {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
       <div className="grid grid-cols-2 gap-4">
-        <FormField
-          control={form.control}
-          name="address_line1"
-          render={({ field }) => (
-            <FormItem className="col-span-2">
-              <FormLabel>Address Line 1</FormLabel>
-              <FormControl>
-                <Input {...field} className="h-9" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="address_line2"
-          render={({ field }) => (
-            <FormItem className="col-span-2">
-              <FormLabel>Address Line 2</FormLabel>
-              <FormControl>
-                <Input {...field} className="h-9" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
         <FormField
           control={form.control}
           name="city"
@@ -45,12 +46,13 @@ export const AddressSection = ({ form }: AddressSectionProps) => {
             <FormItem>
               <FormLabel>City</FormLabel>
               <FormControl>
-                <Input {...field} className="h-9" />
+                <Input {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="state"
@@ -58,12 +60,13 @@ export const AddressSection = ({ form }: AddressSectionProps) => {
             <FormItem>
               <FormLabel>State</FormLabel>
               <FormControl>
-                <Input {...field} className="h-9" />
+                <Input {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="country"
@@ -71,12 +74,13 @@ export const AddressSection = ({ form }: AddressSectionProps) => {
             <FormItem>
               <FormLabel>Country</FormLabel>
               <FormControl>
-                <Input {...field} className="h-9" />
+                <Input {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="postal_code"
@@ -84,13 +88,47 @@ export const AddressSection = ({ form }: AddressSectionProps) => {
             <FormItem>
               <FormLabel>Postal Code</FormLabel>
               <FormControl>
-                <Input {...field} className="h-9" />
+                <Input {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
       </div>
+
+      <FormField
+        control={form.control}
+        name="website"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Website URL</FormLabel>
+            <FormControl>
+              <div className="relative">
+                <Input {...field} className="pl-9" />
+                <Link className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-400" />
+              </div>
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="linkedin"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>LinkedIn URL</FormLabel>
+            <FormControl>
+              <div className="relative">
+                <Input {...field} className="pl-9" />
+                <Linkedin className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-400" />
+              </div>
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
     </div>
   );
-};
+}

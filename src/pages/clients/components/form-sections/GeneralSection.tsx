@@ -1,105 +1,114 @@
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { UseFormReturn } from "react-hook-form";
-import type { ClientFormValues } from "../../client-form.schema";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 interface GeneralSectionProps {
-  form: UseFormReturn<ClientFormValues>;
-  parentAccounts: { value: string; label: string; }[];
+  form: UseFormReturn<any>;
 }
 
-export const GeneralSection = ({ form, parentAccounts }: GeneralSectionProps) => {
+export function GeneralSection({ form }: GeneralSectionProps) {
+  const { data: parentClients } = useQuery({
+    queryKey: ['parent-clients'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('client_accounts')
+        .select('client_account_id, display_name')
+        .eq('location_type', 'HEADQUARTERS');
+      
+      if (error) throw error;
+      return data;
+    }
+  });
+
   return (
-    <div className="space-y-3 p-4 border rounded-lg bg-white">
-      <h3 className="text-lg font-medium border-b pb-2">General Information</h3>
-      <div className="grid grid-cols-2 gap-4">
-        <FormField
-          control={form.control}
-          name="display_name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Display Name</FormLabel>
+    <div className="space-y-4">
+      <FormField
+        control={form.control}
+        name="display_name"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Display Name</FormLabel>
+            <FormControl>
+              <Input {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="client_code"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Client Code</FormLabel>
+            <FormControl>
+              <Input {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="location_type"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Location Type</FormLabel>
+            <Select onValueChange={field.onChange} value={field.value}>
               <FormControl>
-                <Input {...field} className="h-9" />
+                <SelectTrigger>
+                  <SelectValue placeholder="Select location type" />
+                </SelectTrigger>
               </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="client_code"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Client Code</FormLabel>
-              <FormControl>
-                <Input {...field} className="h-9" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="location_type"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Location Type</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger className="h-9">
-                    <SelectValue placeholder="Select location type" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="HEADQUARTERS">Headquarters</SelectItem>
-                  <SelectItem value="BRANCH">Branch</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="relationship_type"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Relationship Type</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger className="h-9">
-                    <SelectValue placeholder="Select relationship type" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="PROSPECT">Prospect</SelectItem>
-                  <SelectItem value="CLIENT">Client</SelectItem>
-                  <SelectItem value="PARTNER">Partner</SelectItem>
-                  <SelectItem value="AFFILIATE">Affiliate</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+              <SelectContent>
+                <SelectItem value="HEADQUARTERS">Headquarters</SelectItem>
+                <SelectItem value="BRANCH">Branch</SelectItem>
+              </SelectContent>
+            </Select>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="has_parent"
+        render={({ field }) => (
+          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+            <FormLabel className="font-normal">Has Parent Client</FormLabel>
+            <FormControl>
+              <Switch
+                checked={field.value}
+                onCheckedChange={field.onChange}
+              />
+            </FormControl>
+          </FormItem>
+        )}
+      />
+
+      {form.watch('has_parent') && (
         <FormField
           control={form.control}
           name="parent_client_account_id"
           render={({ field }) => (
-            <FormItem className="col-span-2">
+            <FormItem>
               <FormLabel>Parent Client</FormLabel>
               <Select onValueChange={field.onChange} value={field.value || ""}>
                 <FormControl>
-                  <SelectTrigger className="h-9">
+                  <SelectTrigger>
                     <SelectValue placeholder="Select parent client" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {parentAccounts.map((account) => (
-                    <SelectItem key={account.value} value={account.value}>
-                      {account.label}
+                  {parentClients?.map((client) => (
+                    <SelectItem key={client.client_account_id} value={client.client_account_id}>
+                      {client.display_name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -108,7 +117,7 @@ export const GeneralSection = ({ form, parentAccounts }: GeneralSectionProps) =>
             </FormItem>
           )}
         />
-      </div>
+      )}
     </div>
   );
-};
+}

@@ -1,48 +1,31 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { ClientAccountDialog } from "./ClientAccountDialog";
-import type { Database } from "@/integrations/supabase/types";
 import { Plus } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ClientSearch } from "./components/ClientSearch";
 import { ClientTable } from "./components/ClientTable";
 import { ClientTabs } from "./components/ClientTabs";
+import { NewClientDrawer } from "./components/NewClientDrawer";
 
-type ClientAccount = Database["public"]["Tables"]["client_accounts"]["Row"];
 type TabType = "all" | "active" | "inactive";
 
 const ITEMS_PER_PAGE = 20;
 
 export const ClientAccounts = () => {
-  const [selectedClient, setSelectedClient] = useState<ClientAccount | null>(null);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
-  // Handle search with debouncing
-  const handleSearchChange = (value: string) => {
-    console.log("Search query changed:", value);
-    setSearchQuery(value);
-    setDebouncedSearchQuery(value);
-  };
-
-  const handleClearSearch = () => {
-    setSearchQuery("");
-    setDebouncedSearchQuery("");
-  };
-
-  // Fetch counts with proper stale time and caching
   const { data: counts, isLoading: isCountsLoading } = useQuery({
-    queryKey: ["client-counts", debouncedSearchQuery],
+    queryKey: ["client-counts", searchQuery],
     queryFn: async () => {
-      console.log("Fetching counts with search:", debouncedSearchQuery);
+      console.log("Fetching counts with search:", searchQuery);
       const createBaseQuery = () => {
         let query = supabase.from("client_accounts").select("*", { count: "exact", head: true });
-        if (debouncedSearchQuery) {
-          query = query.ilike("display_name", `%${debouncedSearchQuery}%`);
+        if (searchQuery) {
+          query = query.ilike("display_name", `%${searchQuery}%`);
         }
         return query;
       };
@@ -63,7 +46,7 @@ export const ClientAccounts = () => {
   });
 
   const fetchClients = async ({ pageParam = 0 }) => {
-    console.log("Fetching clients with search:", debouncedSearchQuery);
+    console.log("Fetching clients with search:", searchQuery);
     let query = supabase
       .from("client_accounts")
       .select(`
@@ -71,8 +54,8 @@ export const ClientAccounts = () => {
         industry:industries(industry_name)
       `);
 
-    if (debouncedSearchQuery) {
-      query = query.ilike("display_name", `%${debouncedSearchQuery}%`);
+    if (searchQuery) {
+      query = query.ilike("display_name", `%${searchQuery}%`);
     }
 
     if (activeTab === "active") {
@@ -95,9 +78,8 @@ export const ClientAccounts = () => {
     hasNextPage,
     isLoading,
     isFetchingNextPage,
-    refetch
   } = useInfiniteQuery({
-    queryKey: ["clients", activeTab, debouncedSearchQuery],
+    queryKey: ["clients", activeTab, searchQuery],
     queryFn: fetchClients,
     initialPageParam: 0,
     getNextPageParam: (lastPage, pages) => {
@@ -116,17 +98,7 @@ export const ClientAccounts = () => {
     }
   };
 
-  const handleEdit = (client: ClientAccount) => {
-    setSelectedClient(client);
-    setIsDialogOpen(true);
-  };
-
-  const handleCreate = () => {
-    setSelectedClient(null);
-    setIsDialogOpen(true);
-  };
-
-  const formatLocation = (client: ClientAccount) => {
+  const formatLocation = (client: any) => {
     const parts = [client.city, client.state, client.country]
       .filter(Boolean)
       .join(", ");
@@ -140,10 +112,10 @@ export const ClientAccounts = () => {
         <div className="flex items-center gap-4">
           <ClientSearch
             searchQuery={searchQuery}
-            onSearchChange={handleSearchChange}
-            onClearSearch={handleClearSearch}
+            onSearchChange={setSearchQuery}
+            onClearSearch={() => setSearchQuery("")}
           />
-          <Button onClick={handleCreate} size="icon" className="h-8 w-8">
+          <Button onClick={() => setIsDrawerOpen(true)} size="icon" className="h-8 w-8">
             <Plus className="h-4 w-4" />
           </Button>
         </div>
@@ -159,17 +131,15 @@ export const ClientAccounts = () => {
         <ScrollArea className="h-[calc(100vh-220px)]" onScroll={handleScroll}>
           <ClientTable
             clients={data?.pages.flatMap(page => page.data || []) || []}
-            onEdit={handleEdit}
             formatLocation={formatLocation}
             isFetchingNextPage={isFetchingNextPage}
           />
         </ScrollArea>
       </div>
 
-      <ClientAccountDialog
-        open={isDialogOpen}
-        onOpenChange={setIsDialogOpen}
-        client={selectedClient}
+      <NewClientDrawer
+        open={isDrawerOpen}
+        onOpenChange={setIsDrawerOpen}
       />
     </div>
   );

@@ -56,7 +56,7 @@ export const ClientAccounts = () => {
         *,
         industry:industries(industry_name),
         entity_type:entity_types(type_name),
-        parent_client:client_accounts!client_accounts_parent_client_account_id_fkey(display_name)
+        parent:client_accounts!parent_client_account_id(display_name)
       `);
 
     if (searchQuery) {
@@ -124,7 +124,7 @@ export const ClientAccounts = () => {
           *,
           industry:industries(industry_name),
           entity_type:entity_types(type_name),
-          parent_client:client_accounts!client_accounts_parent_client_account_id_fkey(display_name)
+          parent:client_accounts!parent_client_account_id(display_name)
         `);
 
       if (error) throw error;
@@ -136,7 +136,7 @@ export const ClientAccounts = () => {
         'Client Code': client.client_code,
         'Industry': client.industry?.industry_name || '',
         'Entity Type': client.entity_type?.type_name || '',
-        'Parent Client': client.parent_client?.display_name || '',
+        'Parent Client': client.parent?.display_name || '',
         'Location Type': client.location_type,
         'Is Client': client.is_client ? 'Yes' : 'No',
         'Is Active': client.is_active ? 'Yes' : 'No',

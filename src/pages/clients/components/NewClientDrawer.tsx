@@ -12,7 +12,6 @@ import { AddressSection } from "./form-sections/AddressSection";
 import { Button } from "@/components/ui/button";
 
 const formSchema = z.object({
-  // General Section
   logo_url: z.string().optional().nullable(),
   display_name: z.string().min(1, "Display name is required"),
   client_code: z.string().min(1, "Client code is required"),
@@ -20,12 +19,10 @@ const formSchema = z.object({
   has_parent: z.boolean().default(false),
   parent_client_account_id: z.string().optional().nullable(),
   
-  // Client Status Section
   parent_company_id: z.string().min(1, "Parent company is required"),
   is_active: z.boolean().default(true),
   is_client: z.boolean().default(false),
   
-  // Address Section
   address_line1: z.string().optional().nullable(),
   address_line2: z.string().optional().nullable(),
   city: z.string().optional().nullable(),
@@ -73,19 +70,15 @@ export function NewClientDrawer({ open, onOpenChange }: NewClientDrawerProps) {
     },
   });
 
-  // Watch form values to calculate progress
   const formValues = form.watch();
   
   useEffect(() => {
-    // Calculate General section progress
     const generalFields = ['display_name', 'client_code', 'location_type'];
     const generalProgress = calculateSectionProgress(generalFields, formValues);
     
-    // Calculate Status section progress
     const statusFields = ['parent_company_id'];
     const statusProgress = calculateSectionProgress(statusFields, formValues);
     
-    // Calculate Address section progress
     const addressFields = ['address_line1', 'city', 'country', 'postal_code'];
     const addressProgress = calculateSectionProgress(addressFields, formValues);
     
@@ -113,7 +106,7 @@ export function NewClientDrawer({ open, onOpenChange }: NewClientDrawerProps) {
         <div className="px-4 overflow-y-auto h-[calc(100vh-140px)]">
           <Form {...form}>
             <form className="space-y-2">
-              <Accordion type="single" defaultValue={["general", "status", "address"]} className="w-full space-y-2">
+              <Accordion type="single" defaultValue="general" className="w-full space-y-2">
                 <AccordionItem value="general" className="border px-2 py-1">
                   <AccordionTrigger className="hover:no-underline py-2">
                     <div className="flex flex-col items-start">

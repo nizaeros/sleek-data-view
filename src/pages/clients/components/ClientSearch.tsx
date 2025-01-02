@@ -12,24 +12,10 @@ interface ClientSearchProps {
 export const ClientSearch = ({ searchQuery, onSearchChange, onClearSearch }: ClientSearchProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Debounce search to prevent excessive re-renders
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (inputRef.current) {
-        onSearchChange(inputRef.current.value);
-      }
-    }, 300);
-
-    return () => clearTimeout(timer);
-  }, [searchQuery, onSearchChange]);
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    // Update local state immediately for responsive UI
-    if (inputRef.current) {
-      inputRef.current.value = value;
-    }
-    // Parent component will be updated after debounce
+    console.log("Search input changed:", value);
+    onSearchChange(value);
   };
 
   const handleClear = () => {
@@ -46,7 +32,7 @@ export const ClientSearch = ({ searchQuery, onSearchChange, onClearSearch }: Cli
         ref={inputRef}
         type="text"
         placeholder="Search clients..."
-        defaultValue={searchQuery}
+        value={searchQuery}
         onChange={handleChange}
         className="pr-8"
       />

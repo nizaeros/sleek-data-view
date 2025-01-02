@@ -24,6 +24,8 @@ export const ClientAccounts = () => {
 
   // Handle search with debouncing
   const handleSearchChange = (value: string) => {
+    console.log("Search query changed:", value);
+    setSearchQuery(value);
     setDebouncedSearchQuery(value);
   };
 
@@ -36,6 +38,7 @@ export const ClientAccounts = () => {
   const { data: counts, isLoading: isCountsLoading } = useQuery({
     queryKey: ["client-counts", debouncedSearchQuery],
     queryFn: async () => {
+      console.log("Fetching counts with search:", debouncedSearchQuery);
       const createBaseQuery = () => {
         let query = supabase.from("client_accounts").select("*", { count: "exact", head: true });
         if (debouncedSearchQuery) {
@@ -60,6 +63,7 @@ export const ClientAccounts = () => {
   });
 
   const fetchClients = async ({ pageParam = 0 }) => {
+    console.log("Fetching clients with search:", debouncedSearchQuery);
     let query = supabase
       .from("client_accounts")
       .select("*", { count: "exact" });
@@ -88,6 +92,7 @@ export const ClientAccounts = () => {
     hasNextPage,
     isLoading,
     isFetchingNextPage,
+    refetch
   } = useInfiniteQuery({
     queryKey: ["clients", activeTab, debouncedSearchQuery],
     queryFn: fetchClients,
@@ -131,7 +136,7 @@ export const ClientAccounts = () => {
         <h1 className="text-base font-semibold text-[#1034A6]">Client Accounts</h1>
         <div className="flex items-center gap-4">
           <ClientSearch
-            searchQuery={debouncedSearchQuery}
+            searchQuery={searchQuery}
             onSearchChange={handleSearchChange}
             onClearSearch={handleClearSearch}
           />

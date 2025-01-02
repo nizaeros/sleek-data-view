@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { clientFormSchema, type ClientFormValues } from "../client-form.schema";
 import { useQueryClient } from "@tanstack/react-query";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 
 interface NewClientDrawerProps {
   open: boolean;
@@ -143,11 +144,11 @@ export function NewClientDrawer({ open, onOpenChange }: NewClientDrawerProps) {
   };
 
   return (
-    <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="fixed right-0 h-full w-[500px] mt-0 border-l">
-        <DrawerHeader className="px-4 py-2">
-          <DrawerTitle>Add New Client</DrawerTitle>
-        </DrawerHeader>
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent side="right" className="w-[500px] sm:w-[540px] overflow-y-auto">
+        <SheetHeader className="px-4 py-2">
+          <SheetTitle>Add New Client</SheetTitle>
+        </SheetHeader>
         <div className="px-4 overflow-y-auto h-[calc(100vh-140px)]">
           <Form {...form}>
             <form className="space-y-2">
@@ -201,7 +202,7 @@ export function NewClientDrawer({ open, onOpenChange }: NewClientDrawerProps) {
             </Button>
           </div>
         </div>
-      </DrawerContent>
-    </Drawer>
+      </SheetContent>
+    </Sheet>
   );
 }

@@ -35,7 +35,7 @@ export type Database = {
           registered_name: string
           relationship_notes: string | null
           relationship_type: Database["public"]["Enums"]["company_relationship_type"]
-          slug: string
+          slug: string | null
           state: string | null
           tan: string | null
           updated_at: string | null
@@ -66,7 +66,7 @@ export type Database = {
           registered_name: string
           relationship_notes?: string | null
           relationship_type?: Database["public"]["Enums"]["company_relationship_type"]
-          slug: string
+          slug?: string | null
           state?: string | null
           tan?: string | null
           updated_at?: string | null
@@ -97,7 +97,7 @@ export type Database = {
           registered_name?: string
           relationship_notes?: string | null
           relationship_type?: Database["public"]["Enums"]["company_relationship_type"]
-          slug?: string
+          slug?: string | null
           state?: string | null
           tan?: string | null
           updated_at?: string | null
@@ -962,6 +962,12 @@ export type Database = {
     Functions: {
       generate_migration: {
         Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      generate_unique_slug: {
+        Args: {
+          display_name: string
+        }
         Returns: string
       }
     }

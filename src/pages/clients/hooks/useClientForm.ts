@@ -33,38 +33,6 @@ export const useClientForm = (client: ClientAccount | null, onSuccess: () => voi
     },
   });
 
-  const generateUniqueSlug = async (displayName: string, currentSlug?: string): Promise<string> => {
-    // Generate base slug
-    let baseSlug = displayName
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '');
-
-    // If we're updating and the slug hasn't changed, return the current slug
-    if (currentSlug && baseSlug === currentSlug) {
-      return currentSlug;
-    }
-
-    // Add timestamp to make the slug unique
-    const timestamp = Date.now().toString(36);
-    baseSlug = `${baseSlug}-${timestamp}`;
-
-    // Double check if the slug exists (just in case)
-    const { data: existingClients } = await supabase
-      .from("client_accounts")
-      .select("slug")
-      .eq("slug", baseSlug)
-      .single();
-
-    if (existingClients) {
-      // In the unlikely case of a collision, add a random string
-      const randomString = Math.random().toString(36).substring(2, 7);
-      baseSlug = `${baseSlug}-${randomString}`;
-    }
-
-    return baseSlug;
-  };
-
   const mutation = useMutation({
     mutationFn: async (values: ClientFormValues) => {
       console.log("Starting mutation with values:", values);
@@ -74,17 +42,9 @@ export const useClientForm = (client: ClientAccount | null, onSuccess: () => voi
         throw new Error("Parent company selection is required");
       }
 
-      // Generate unique slug based on whether we're updating or creating
-      const slug = await generateUniqueSlug(values.display_name, client?.slug);
-
-      // Generate client code if not provided
-      const clientCode = values.client_code || values.display_name.substring(0, 3).toUpperCase();
-
       // Prepare data for insert/update
       const data = {
         ...clientData,
-        slug,
-        client_code: clientCode,
         display_name: values.display_name,
         registered_name: values.registered_name || values.display_name,
         location_type: values.location_type,

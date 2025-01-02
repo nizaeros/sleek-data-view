@@ -10,19 +10,19 @@ import { GeneralSection } from "./form-sections/GeneralSection";
 import { ClientStatusSection } from "./form-sections/ClientStatusSection";
 import { AddressSection } from "./form-sections/AddressSection";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const formSchema = z.object({
   logo_url: z.string().optional().nullable(),
   display_name: z.string().min(1, "Display name is required"),
-  client_code: z.string().min(1, "Client code is required"),
+  client_code: z.string().optional().nullable(),
   location_type: z.enum(["HEADQUARTERS", "BRANCH"]),
   has_parent: z.boolean().default(false),
   parent_client_account_id: z.string().optional().nullable(),
-  
-  parent_company_id: z.string().min(1, "Parent company is required"),
+  parent_company_id: z.string().min(1, "Parent company selection is required"),
   is_active: z.boolean().default(true),
-  is_client: z.boolean().default(false),
-  
+  is_client: z.boolean().default(true),
   address_line1: z.string().optional().nullable(),
   address_line2: z.string().optional().nullable(),
   city: z.string().optional().nullable(),
@@ -41,6 +41,7 @@ interface NewClientDrawerProps {
 }
 
 export function NewClientDrawer({ open, onOpenChange }: NewClientDrawerProps) {
+  const { toast } = useToast();
   const [sectionProgress, setSectionProgress] = useState({
     general: 0,
     status: 0,
@@ -52,13 +53,13 @@ export function NewClientDrawer({ open, onOpenChange }: NewClientDrawerProps) {
     defaultValues: {
       logo_url: null,
       display_name: "",
-      client_code: "",
+      client_code: null,
       location_type: "BRANCH",
       has_parent: false,
       parent_client_account_id: null,
       parent_company_id: "",
       is_active: true,
-      is_client: false,
+      is_client: true,
       address_line1: null,
       address_line2: null,
       city: null,
@@ -96,6 +97,58 @@ export function NewClientDrawer({ open, onOpenChange }: NewClientDrawerProps) {
     });
     return (filledFields.length / fields.length) * 100;
   }
+
+  const onSubmit = async (values: FormValues) => {
+    try {
+      console.log("Form values:", values);
+      
+      // Insert into client_accounts
+      const { data: clientData, error: clientError } = await supabase
+        .from('client_accounts')
+        .insert({
+          display_name: values.display_name,
+          client_code: values.client_code || values.display_name.substring(0, 3).toUpperCase(),
+          location_type: values.location_type,
+          is_client: true,
+          is_active: values.is_active,
+          address_line1: values.address_line1,
+          address_line2: values.address_line2,
+          city: values.city,
+          state: values.state,
+          country: values.country,
+          postal_code: values.postal_code,
+          parent_client_account_id: values.parent_client_account_id,
+        })
+        .select()
+        .single();
+
+      if (clientError) throw clientError;
+
+      // Insert parent company association
+      const { error: associationError } = await supabase
+        .from('parent_client_association')
+        .insert({
+          client_account_id: clientData.client_account_id,
+          parent_company_id: values.parent_company_id,
+        });
+
+      if (associationError) throw associationError;
+
+      toast({
+        title: "Success",
+        description: "Client created successfully",
+      });
+
+      onOpenChange(false);
+    } catch (error) {
+      console.error('Error creating client:', error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to create client",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
@@ -151,7 +204,7 @@ export function NewClientDrawer({ open, onOpenChange }: NewClientDrawerProps) {
             <Button variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button onClick={form.handleSubmit((data) => console.log(data))}>
+            <Button onClick={form.handleSubmit(onSubmit)}>
               Save Client
             </Button>
           </div>

@@ -174,26 +174,9 @@ export const ClientAccounts = () => {
   };
 
   useEffect(() => {
-    const channel = supabase
-      .channel('schema-db-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'client_accounts'
-        },
-        () => {
-          // Invalidate queries to refresh the data
-          queryClient.invalidateQueries({ queryKey: ['clients'] });
-          queryClient.invalidateQueries({ queryKey: ['client-counts'] });
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    // Invalidate queries to refresh the data
+    queryClient.invalidateQueries({ queryKey: ['clients'] });
+    queryClient.invalidateQueries({ queryKey: ['client-counts'] });
   }, [queryClient]);
 
   return (

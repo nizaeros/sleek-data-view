@@ -19,9 +19,6 @@ export const clientFormSchema = z.object({
   website: z.string().optional(),
   linkedin: z.string().optional(),
   registration_number: z.string().optional(),
-  gstin: z.string().optional(),
-  tan: z.string().optional(),
-  icn: z.string().optional(),
 });
 
 export type ClientFormValues = z.infer<typeof clientFormSchema>;

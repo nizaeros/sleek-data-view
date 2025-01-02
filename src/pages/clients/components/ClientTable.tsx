@@ -77,7 +77,7 @@ export const ClientTable = ({
                       }`}
                     />
                     {client.display_name}
-                    <div className="flex items-center gap-1 ml-2">
+                    <div className="flex items-center gap-1 ml-2 opacity-30 hover:opacity-100 transition-opacity">
                       <Button 
                         variant="ghost" 
                         size="icon"
@@ -85,14 +85,14 @@ export const ClientTable = ({
                           e.stopPropagation();
                           onEdit(client);
                         }}
-                        className="h-7 w-7 text-gray-400 hover:text-[#1034A6] transition-colors"
+                        className="h-7 w-7 text-gray-500 hover:text-[#1034A6] transition-colors"
                       >
                         <Pencil className="h-4 w-4" />
                       </Button>
                       <Button 
                         variant="ghost" 
                         size="icon"
-                        className="h-7 w-7 text-gray-400 hover:text-[#1034A6] transition-colors"
+                        className="h-7 w-7 text-gray-500 hover:text-[#1034A6] transition-colors"
                         onClick={(e) => {
                           e.stopPropagation();
                           console.log('Navigate to dashboard', client.client_account_id);

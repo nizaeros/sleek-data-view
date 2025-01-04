@@ -3,6 +3,7 @@ import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { Roadmap } from "@/components/Roadmap";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -17,8 +18,8 @@ const Login = () => {
   }, [navigate]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white">
-      <div className="w-full max-w-md p-8 space-y-6">
+    <div className="min-h-screen bg-white">
+      <div className="w-full max-w-md mx-auto p-8 space-y-6">
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold" style={{ color: "#1034A6" }}>
             Welcome to DOPZ
@@ -46,6 +47,7 @@ const Login = () => {
           />
         </div>
       </div>
+      <Roadmap />
     </div>
   );
 };
